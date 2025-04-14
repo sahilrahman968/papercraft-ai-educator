@@ -106,9 +106,9 @@ const CreatePaperPage: React.FC = () => {
   
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
-    type: '',
+    type: 'all',
     chapter: '',
-    difficulty: '',
+    difficulty: 'all',
     marks: '',
   });
   
@@ -684,7 +684,7 @@ const CreatePaperPage: React.FC = () => {
                             <SelectValue placeholder="All types" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">All types</SelectItem>
+                            <SelectItem value="all">All types</SelectItem>
                             {QUESTION_TYPES.map(type => (
                               <SelectItem key={type} value={type}>{type}</SelectItem>
                             ))}
@@ -702,7 +702,7 @@ const CreatePaperPage: React.FC = () => {
                             <SelectValue placeholder="All chapters" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">All chapters</SelectItem>
+                            <SelectItem value="all">All chapters</SelectItem>
                             {availableChapters.map(chapter => (
                               <SelectItem key={chapter} value={chapter}>{chapter}</SelectItem>
                             ))}
@@ -720,7 +720,7 @@ const CreatePaperPage: React.FC = () => {
                             <SelectValue placeholder="All difficulties" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">All difficulties</SelectItem>
+                            <SelectItem value="all">All difficulties</SelectItem>
                             <SelectItem value="Easy">Easy</SelectItem>
                             <SelectItem value="Medium">Medium</SelectItem>
                             <SelectItem value="Hard">Hard</SelectItem>
@@ -738,7 +738,7 @@ const CreatePaperPage: React.FC = () => {
                             <SelectValue placeholder="All marks" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">All marks</SelectItem>
+                            <SelectItem value="all">All marks</SelectItem>
                             <SelectItem value="1">1 mark</SelectItem>
                             <SelectItem value="2">2 marks</SelectItem>
                             <SelectItem value="3">3 marks</SelectItem>

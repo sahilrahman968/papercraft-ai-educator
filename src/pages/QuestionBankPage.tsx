@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Layout } from '@/components/Layout';
 import { useData } from '@/context/DataContext';
@@ -51,15 +52,15 @@ const QuestionBankPage: React.FC = () => {
   const { questions, addQuestion, updateQuestion, deleteQuestion } = useData();
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
-    type: '',
-    board: '',
-    class: '',
-    subject: '',
+    type: 'all',
+    board: 'all',
+    class: 'all',
+    subject: 'all',
     chapter: '',
     topic: '',
-    difficulty: '',
+    difficulty: 'all',
     marks: '',
-    bloomLevel: ''
+    bloomLevel: 'all'
   });
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
@@ -82,15 +83,15 @@ const QuestionBankPage: React.FC = () => {
 
   const filteredQuestions = questions.filter(question => {
     const matchesSearch = searchTerm ? question.text.toLowerCase().includes(searchTerm.toLowerCase()) : true;
-    const matchesType = filters.type ? question.type === filters.type : true;
-    const matchesBoard = filters.board ? question.board === filters.board : true;
-    const matchesClass = filters.class ? question.class === filters.class : true;
-    const matchesSubject = filters.subject ? question.subject === filters.subject : true;
+    const matchesType = filters.type !== 'all' ? question.type === filters.type : true;
+    const matchesBoard = filters.board !== 'all' ? question.board === filters.board : true;
+    const matchesClass = filters.class !== 'all' ? question.class === filters.class : true;
+    const matchesSubject = filters.subject !== 'all' ? question.subject === filters.subject : true;
     const matchesChapter = filters.chapter ? question.chapter === filters.chapter : true;
     const matchesTopic = filters.topic ? question.topic === filters.topic : true;
-    const matchesDifficulty = filters.difficulty ? question.difficulty === filters.difficulty : true;
+    const matchesDifficulty = filters.difficulty !== 'all' ? question.difficulty === filters.difficulty : true;
     const matchesMarks = filters.marks ? question.marks === parseInt(filters.marks, 10) : true;
-    const matchesBloomLevel = filters.bloomLevel ? question.bloomLevel === filters.bloomLevel : true;
+    const matchesBloomLevel = filters.bloomLevel !== 'all' ? question.bloomLevel === filters.bloomLevel : true;
 
     return matchesSearch && matchesType && matchesBoard && matchesClass && matchesSubject && matchesChapter && matchesTopic && matchesDifficulty && matchesMarks && matchesBloomLevel;
   });
@@ -196,7 +197,7 @@ const QuestionBankPage: React.FC = () => {
                     <SelectValue placeholder="Filter Type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Types</SelectItem>
+                    <SelectItem value="all">All Types</SelectItem>
                     {QUESTION_TYPES.map(type => (
                       <SelectItem key={type} value={type}>{type}</SelectItem>
                     ))}
@@ -207,7 +208,7 @@ const QuestionBankPage: React.FC = () => {
                     <SelectValue placeholder="Filter Board" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Boards</SelectItem>
+                    <SelectItem value="all">All Boards</SelectItem>
                     {BOARDS.map(board => (
                       <SelectItem key={board} value={board}>{board}</SelectItem>
                     ))}
@@ -218,7 +219,7 @@ const QuestionBankPage: React.FC = () => {
                     <SelectValue placeholder="Filter Class" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Classes</SelectItem>
+                    <SelectItem value="all">All Classes</SelectItem>
                     {CLASSES.map(cls => (
                       <SelectItem key={cls} value={cls}>Class {cls}</SelectItem>
                     ))}
@@ -229,7 +230,7 @@ const QuestionBankPage: React.FC = () => {
                     <SelectValue placeholder="Filter Subject" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Subjects</SelectItem>
+                    <SelectItem value="all">All Subjects</SelectItem>
                     {SUBJECTS.map(subject => (
                       <SelectItem key={subject} value={subject}>{subject}</SelectItem>
                     ))}
@@ -278,7 +279,7 @@ const QuestionBankPage: React.FC = () => {
                               <SelectValue placeholder="Select difficulty" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="">All Difficulties</SelectItem>
+                              <SelectItem value="all">All Difficulties</SelectItem>
                               {DIFFICULTIES.map(difficulty => (
                                 <SelectItem key={difficulty} value={difficulty}>{difficulty}</SelectItem>
                               ))}
@@ -303,7 +304,7 @@ const QuestionBankPage: React.FC = () => {
                             <SelectValue placeholder="Select Bloom's Level" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">All Levels</SelectItem>
+                            <SelectItem value="all">All Levels</SelectItem>
                             {BLOOM_LEVELS.map(level => (
                               <SelectItem key={level} value={level}>{level}</SelectItem>
                             ))}

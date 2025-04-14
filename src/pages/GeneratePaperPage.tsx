@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Layout } from '@/components/Layout';
 import { useData } from '@/context/DataContext';
@@ -65,27 +64,22 @@ const GeneratePaperPage: React.FC = () => {
   
   const chapters = CHAPTERS_BY_SUBJECT[subject] || [];
   
-  // Get topics for all selected chapters
   const availableTopics = selectedChapters.flatMap(chapter => 
     TOPICS_BY_CHAPTER[chapter] || []
   );
   
   const handleChapterToggle = (chapter: string) => {
     if (selectedChapters.includes(chapter)) {
-      // Remove chapter
       setSelectedChapters(selectedChapters.filter(c => c !== chapter));
     } else {
-      // Add chapter
       setSelectedChapters([...selectedChapters, chapter]);
     }
   };
   
   const handleTopicToggle = (topic: string) => {
     if (selectedTopics.includes(topic)) {
-      // Remove topic
       setSelectedTopics(selectedTopics.filter(t => t !== topic));
     } else {
-      // Add topic
       setSelectedTopics([...selectedTopics, topic]);
     }
   };
@@ -105,7 +99,6 @@ const GeneratePaperPage: React.FC = () => {
   };
   
   const handleDifficultyChange = (value: number[]) => {
-    // Ensure the three values sum to 100
     const newEasy = value[0];
     const newMedium = Math.round((100 - newEasy) * (difficulty[1] / (difficulty[1] + difficulty[2])));
     const newHard = 100 - newEasy - newMedium;
@@ -134,18 +127,17 @@ const GeneratePaperPage: React.FC = () => {
     try {
       const generatedPaper = await generateQuestionPaper(params);
       
-      // Save the generated paper
       const paperId = createQuestionPaper({
         title: generatedPaper.title,
         board: generatedPaper.board,
         class: generatedPaper.class,
         subject: generatedPaper.subject,
-        createdBy: 'user1', // Would come from current user
+        createdBy: 'user1',
         totalMarks: generatedPaper.totalMarks,
         duration: generatedPaper.duration,
         sections: generatedPaper.sections,
         instructions: generatedPaper.instructions,
-        schoolHeader: 'Springfield High School', // Would come from school settings
+        schoolHeader: 'Springfield High School'
       });
       
       toast({
@@ -154,7 +146,6 @@ const GeneratePaperPage: React.FC = () => {
         variant: "default",
       });
       
-      // Navigate to the editor
       navigate(`/edit-paper/${paperId}`);
     } catch (error) {
       console.error('Error generating paper:', error);
@@ -177,14 +168,12 @@ const GeneratePaperPage: React.FC = () => {
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main parameters section */}
           <Card className="lg:col-span-2">
             <CardContent className="p-6">
               <div className="space-y-6">
                 <h2 className="text-xl font-semibold mb-4">1. Basic Parameters</h2>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* Board Selection */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Board</label>
                     <Select
@@ -202,7 +191,6 @@ const GeneratePaperPage: React.FC = () => {
                     </Select>
                   </div>
                   
-                  {/* Class Selection */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Class</label>
                     <Select
@@ -220,7 +208,6 @@ const GeneratePaperPage: React.FC = () => {
                     </Select>
                   </div>
                   
-                  {/* Subject Selection */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Subject</label>
                     <Select
@@ -244,7 +231,6 @@ const GeneratePaperPage: React.FC = () => {
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Total Marks */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Total Marks</label>
                     <Input
@@ -256,7 +242,6 @@ const GeneratePaperPage: React.FC = () => {
                     />
                   </div>
                   
-                  {/* Duration (minutes) */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Duration (minutes)</label>
                     <Input
@@ -271,7 +256,6 @@ const GeneratePaperPage: React.FC = () => {
                 
                 <h2 className="text-xl font-semibold mb-4 pt-4">2. Content Selection</h2>
                 
-                {/* Chapters Selection */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <label className="text-sm font-medium">Chapters</label>
@@ -305,7 +289,6 @@ const GeneratePaperPage: React.FC = () => {
                   )}
                 </div>
                 
-                {/* Topics Selection - only if specific chapters are selected */}
                 {!useAllChapters && selectedChapters.length > 0 && (
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
@@ -343,7 +326,6 @@ const GeneratePaperPage: React.FC = () => {
                 
                 <h2 className="text-xl font-semibold mb-4 pt-4">3. Difficulty Distribution</h2>
                 
-                {/* Difficulty Distribution */}
                 <div className="space-y-6">
                   <div>
                     <div className="flex justify-between mb-2">
@@ -381,7 +363,6 @@ const GeneratePaperPage: React.FC = () => {
             </CardContent>
           </Card>
           
-          {/* Summary and Generate Section */}
           <Card className="lg:row-span-1">
             <CardContent className="p-6">
               <h2 className="text-xl font-semibold mb-4">Summary</h2>
@@ -469,7 +450,6 @@ const GeneratePaperPage: React.FC = () => {
           </Card>
         </div>
         
-        {/* How it works section */}
         <div className="bg-blue-50 p-6 rounded-lg mt-6">
           <h2 className="text-xl font-semibold mb-4">How AI Generation Works</h2>
           
