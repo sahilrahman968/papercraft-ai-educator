@@ -204,7 +204,26 @@ const QuestionBankPage: React.FC = () => {
       updateQuestion(editingQuestion.id, data);
       setEditingQuestion(null);
     } else {
-      addQuestion(data);
+      // Here we need to make sure all required fields are present
+      // The type system enforces this, but let's ensure each field is provided
+      const newQuestion: Omit<Question, 'id'> = {
+        text: data.text,
+        type: data.type,
+        board: data.board,
+        class: data.class,
+        subject: data.subject, 
+        chapter: data.chapter,
+        topic: data.topic,
+        difficulty: data.difficulty,
+        marks: data.marks,
+        bloomLevel: data.bloomLevel,
+        answer: data.answer || '',
+        options: data.options,
+        hasImage: data.hasImage || false,
+        imageUrl: data.imageUrl
+      };
+      
+      addQuestion(newQuestion);
     }
     
     setIsAddDialogOpen(false);
