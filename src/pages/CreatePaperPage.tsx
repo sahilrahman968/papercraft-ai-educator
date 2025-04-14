@@ -121,6 +121,9 @@ const CreatePaperPage: React.FC = () => {
     marks: 3
   });
   
+  const [isSectionless, setIsSectionless] = useState(false);
+  const [directQuestions, setDirectQuestions] = useState<Question[]>([]);
+  
   const filteredQuestions = questions.filter(question => {
     if (question.board !== board || question.class !== classLevel || question.subject !== subject) {
       return false;
@@ -308,10 +311,12 @@ const CreatePaperPage: React.FC = () => {
     }
   };
   
-  const calculatedTotalMarks = sections.reduce(
-    (sum, section) => sum + section.questions.reduce((qSum, q) => qSum + q.marks, 0), 
-    0
-  );
+  const calculatedTotalMarks = isSectionless
+    ? directQuestions.reduce((sum, q) => sum + q.marks, 0)
+    : sections.reduce(
+        (sum, section) => sum + section.questions.reduce((qSum, q) => qSum + q.marks, 0),
+        0
+      );
   
   const handleSavePaper = () => {
     if (!title.trim()) {
@@ -322,8 +327,8 @@ const CreatePaperPage: React.FC = () => {
       });
       return;
     }
-    
-    if (sections.some(section => section.questions.length === 0)) {
+
+    if (!isSectionless && sections.some(section => section.questions.length === 0)) {
       toast({
         title: "Error",
         description: "All sections must have at least one question.",
@@ -331,26 +336,37 @@ const CreatePaperPage: React.FC = () => {
       });
       return;
     }
-    
+
+    if (isSectionless && directQuestions.length === 0) {
+      toast({
+        title: "Error",
+        description: "Please add at least one question to the paper.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const paperId = createQuestionPaper({
         title,
         board,
         class: classLevel,
         subject,
-        createdBy: 'user1', // Would come from current user
+        createdBy: 'user1',
         totalMarks: calculatedTotalMarks,
         duration,
-        sections,
+        sections: isSectionless ? undefined : sections,
+        questions: isSectionless ? directQuestions : undefined,
         instructions,
-        schoolHeader: 'Springfield High School', // Would come from school settings
+        schoolHeader: 'Springfield High School',
+        isSectionless
       });
-      
+
       toast({
         title: "Success",
         description: "Question paper saved successfully!",
       });
-      
+
       navigate(`/question-papers`);
     } catch (error) {
       console.error('Error saving paper:', error);
@@ -361,7 +377,34 @@ const CreatePaperPage: React.FC = () => {
       });
     }
   };
-  
+
+  const addDirectQuestion = (question: Question) => {
+    setDirectQuestions([...directQuestions, {
+      ...question,
+      id: `q-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    }]);
+  };
+
+  const removeDirectQuestion = (questionId: string) => {
+    setDirectQuestions(directQuestions.filter(q => q.id !== questionId));
+  };
+
+  const moveDirectQuestionUp = (questionIndex: number) => {
+    if (questionIndex === 0) return;
+    const newQuestions = [...directQuestions];
+    [newQuestions[questionIndex], newQuestions[questionIndex - 1]] = 
+      [newQuestions[questionIndex - 1], newQuestions[questionIndex]];
+    setDirectQuestions(newQuestions);
+  };
+
+  const moveDirectQuestionDown = (questionIndex: number) => {
+    if (questionIndex === directQuestions.length - 1) return;
+    const newQuestions = [...directQuestions];
+    [newQuestions[questionIndex], newQuestions[questionIndex + 1]] = 
+      [newQuestions[questionIndex + 1], newQuestions[questionIndex]];
+    setDirectQuestions(newQuestions);
+  };
+
   return (
     <Layout>
       <div className="space-y-6 animate-fade-in">
@@ -507,52 +550,33 @@ const CreatePaperPage: React.FC = () => {
         </Card>
         
         <div className="space-y-6">
-          {sections.map((section, sectionIndex) => (
-            <Card key={section.id} className="shadow-sm">
-              <CardHeader className="pb-3">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <input
-                      className="text-xl font-semibold bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-gray-500 focus:outline-none p-0"
-                      value={section.title}
-                      onChange={(e) => updateSection(section.id, { title: e.target.value })}
-                    />
-                    <textarea
-                      className="w-full mt-1 text-sm text-gray-600 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-gray-500 focus:outline-none p-0 resize-none overflow-hidden"
-                      value={section.description || ''}
-                      onChange={(e) => updateSection(section.id, { description: e.target.value })}
-                      placeholder="Section description or instructions..."
-                      rows={1}
-                      style={{ height: 'auto' }}
-                      onInput={(e) => {
-                        const target = e.target as HTMLTextAreaElement;
-                        target.style.height = '';
-                        target.style.height = `${target.scrollHeight}px`;
-                      }}
-                    />
-                  </div>
-                  
-                  {sections.length > 1 && (
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                      onClick={() => removeSection(section.id)}
-                    >
-                      <Trash2 size={18} />
-                    </Button>
-                  )}
-                </div>
+          <Card className="shadow-sm">
+            <CardHeader>
+              <CardTitle>Paper Structure</CardTitle>
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="sectionless">Section-less Paper</Label>
+                <Switch
+                  id="sectionless"
+                  checked={isSectionless}
+                  onCheckedChange={setIsSectionless}
+                />
+              </div>
+            </CardHeader>
+          </Card>
+
+          {isSectionless ? (
+            <Card className="shadow-sm">
+              <CardHeader>
+                <CardTitle>Questions</CardTitle>
               </CardHeader>
-              
               <CardContent>
                 <div className="space-y-4">
-                  {section.questions.length > 0 ? (
-                    section.questions.map((question, questionIndex) => (
+                  {directQuestions.length > 0 ? (
+                    directQuestions.map((question, index) => (
                       <div key={question.id} className="rounded-lg border overflow-hidden">
                         <div className="bg-gray-50 p-3 flex justify-between items-center">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium">Q{sectionIndex + 1}.{questionIndex + 1}</span>
+                            <span className="font-medium">Q{index + 1}</span>
                             <div className="flex gap-1">
                               <span className={`px-2 py-0.5 rounded-full text-xs ${
                                 question.difficulty === 'Easy' ? 'bg-green-100 text-green-800' :
@@ -569,14 +593,14 @@ const CreatePaperPage: React.FC = () => {
                               </span>
                             </div>
                           </div>
-                          
+
                           <div className="flex items-center gap-1">
                             <Button
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8"
-                              onClick={() => moveQuestionUp(section.id, questionIndex)}
-                              disabled={questionIndex === 0}
+                              onClick={() => moveDirectQuestionUp(index)}
+                              disabled={index === 0}
                             >
                               <MoveUp size={16} />
                             </Button>
@@ -584,34 +608,24 @@ const CreatePaperPage: React.FC = () => {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8"
-                              onClick={() => moveQuestionDown(section.id, questionIndex)}
-                              disabled={questionIndex === section.questions.length - 1}
+                              onClick={() => moveDirectQuestionDown(index)}
+                              disabled={index === directQuestions.length - 1}
                             >
                               <MoveDown size={16} />
                             </Button>
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 text-blue-500 hover:text-blue-700 hover:bg-blue-50"
-                              onClick={() => handleRegenerateQuestion(section.id, question.id)}
-                              disabled={isGeneratingQuestion}
-                            >
-                              <RefreshCcw size={16} />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
                               className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                              onClick={() => removeQuestionFromSection(section.id, question.id)}
+                              onClick={() => removeDirectQuestion(question.id)}
                             >
                               <Trash2 size={16} />
                             </Button>
                           </div>
                         </div>
-                        
+
                         <div className="p-4">
                           <div className="text-gray-800">{question.text}</div>
-                          
                           {question.type === 'MCQ' && question.options && (
                             <div className="mt-3 space-y-1.5">
                               {question.options.map((option, oIndex) => (
@@ -624,7 +638,6 @@ const CreatePaperPage: React.FC = () => {
                               ))}
                             </div>
                           )}
-                          
                           {question.hasImage && question.imageUrl && (
                             <div className="mt-3">
                               <img 
@@ -640,13 +653,13 @@ const CreatePaperPage: React.FC = () => {
                   ) : (
                     <div className="text-center p-8 border border-dashed rounded-lg">
                       <p className="text-gray-500">
-                        No questions in this section yet. Add questions from the question bank or generate with AI.
+                        No questions added yet. Add questions from the question bank or generate with AI.
                       </p>
                     </div>
                   )}
                 </div>
               </CardContent>
-              
+
               <CardFooter className="flex gap-4 border-t p-4 bg-gray-50">
                 <Dialog>
                   <DialogTrigger asChild>
@@ -938,19 +951,454 @@ const CreatePaperPage: React.FC = () => {
                 </Dialog>
               </CardFooter>
             </Card>
-          ))}
-          
-          <Button variant="outline" className="w-full py-6" onClick={addNewSection}>
-            <PlusCircle className="mr-2 h-5 w-5" />
-            Add New Section
-          </Button>
-          
-          <div className="flex justify-end">
-            <Button onClick={handleSavePaper} className="bg-educate-400 hover:bg-educate-500">
-              <Save className="mr-2 h-4 w-4" />
-              Save Question Paper
-            </Button>
-          </div>
+          ) : (
+            <div className="space-y-6">
+              {sections.map((section, sectionIndex) => (
+                <Card key={section.id} className="shadow-sm">
+                  <CardHeader className="pb-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <input
+                          className="text-xl font-semibold bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-gray-500 focus:outline-none p-0"
+                          value={section.title}
+                          onChange={(e) => updateSection(section.id, { title: e.target.value })}
+                        />
+                        <textarea
+                          className="w-full mt-1 text-sm text-gray-600 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-gray-500 focus:outline-none p-0 resize-none overflow-hidden"
+                          value={section.description || ''}
+                          onChange={(e) => updateSection(section.id, { description: e.target.value })}
+                          placeholder="Section description or instructions..."
+                          rows={1}
+                          style={{ height: 'auto' }}
+                          onInput={(e) => {
+                            const target = e.target as HTMLTextAreaElement;
+                            target.style.height = '';
+                            target.style.height = `${target.scrollHeight}px`;
+                          }}
+                        />
+                      </div>
+                      
+                      {sections.length > 1 && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => removeSection(section.id)}
+                        >
+                          <Trash2 size={18} />
+                        </Button>
+                      )}
+                    </div>
+                  </CardHeader>
+                  
+                  <CardContent>
+                    <div className="space-y-4">
+                      {section.questions.length > 0 ? (
+                        section.questions.map((question, questionIndex) => (
+                          <div key={question.id} className="rounded-lg border overflow-hidden">
+                            <div className="bg-gray-50 p-3 flex justify-between items-center">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">Q{sectionIndex + 1}.{questionIndex + 1}</span>
+                                <div className="flex gap-1">
+                                  <span className={`px-2 py-0.5 rounded-full text-xs ${
+                                    question.difficulty === 'Easy' ? 'bg-green-100 text-green-800' :
+                                    question.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                                    'bg-red-100 text-red-800'
+                                  }`}>
+                                    {question.difficulty}
+                                  </span>
+                                  <span className="px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-800">
+                                    {question.type}
+                                  </span>
+                                  <span className="px-2 py-0.5 rounded-full text-xs bg-purple-100 text-purple-800">
+                                    {question.marks} marks
+                                  </span>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => moveQuestionUp(section.id, questionIndex)}
+                                  disabled={questionIndex === 0}
+                                >
+                                  <MoveUp size={16} />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => moveQuestionDown(section.id, questionIndex)}
+                                  disabled={questionIndex === section.questions.length - 1}
+                                >
+                                  <MoveDown size={16} />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+                                  onClick={() => handleRegenerateQuestion(section.id, question.id)}
+                                  disabled={isGeneratingQuestion}
+                                >
+                                  <RefreshCcw size={16} />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                  onClick={() => removeQuestionFromSection(section.id, question.id)}
+                                >
+                                  <Trash2 size={16} />
+                                </Button>
+                              </div>
+                            </div>
+                            
+                            <div className="p-4">
+                              <div className="text-gray-800">{question.text}</div>
+                              
+                              {question.type === 'MCQ' && question.options && (
+                                <div className="mt-3 space-y-1.5">
+                                  {question.options.map((option, oIndex) => (
+                                    <div key={oIndex} className="flex items-start gap-2">
+                                      <div className="min-w-[20px] h-5 flex items-center justify-center rounded-full bg-gray-100 text-xs font-medium">
+                                        {String.fromCharCode(65 + oIndex)}
+                                      </div>
+                                      <div className="text-sm">{option}</div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              
+                              {question.hasImage && question.imageUrl && (
+                                <div className="mt-3">
+                                  <img 
+                                    src={question.imageUrl} 
+                                    alt="Question visual" 
+                                    className="max-h-48 rounded border" 
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center p-8 border border-dashed rounded-lg">
+                          <p className="text-gray-500">
+                            No questions in this section yet. Add questions from the question bank or generate with AI.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                  
+                  <CardFooter className="flex gap-4 border-t p-4 bg-gray-50">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" className="gap-2">
+                          <PlusCircle size={16} />
+                          Add from Question Bank
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle>Add Question from Question Bank</DialogTitle>
+                          <DialogDescription>
+                            Browse and select questions to add to this section
+                          </DialogDescription>
+                        </DialogHeader>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+                          <div className="col-span-2 relative">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                            <Input
+                              placeholder="Search questions..."
+                              className="pl-10"
+                              value={searchTerm}
+                              onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="filterType">Question Type</Label>
+                            <Select
+                              value={filters.type}
+                              onValueChange={(value) => setFilters({...filters, type: value})}
+                            >
+                              <SelectTrigger id="filterType">
+                                <SelectValue placeholder="All types" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="all">All types</SelectItem>
+                                {QUESTION_TYPES.map(type => (
+                                  <SelectItem key={type} value={type}>{type}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="filterChapter">Chapter</Label>
+                            <Select
+                              value={filters.chapter}
+                              onValueChange={(value) => setFilters({...filters, chapter: value})}
+                            >
+                              <SelectTrigger id="filterChapter">
+                                <SelectValue placeholder="All chapters" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="all">All chapters</SelectItem>
+                                {availableChapters.map(chapter => (
+                                  <SelectItem key={chapter} value={chapter}>{chapter}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="filterDifficulty">Difficulty</Label>
+                            <Select
+                              value={filters.difficulty}
+                              onValueChange={(value) => setFilters({...filters, difficulty: value})}
+                            >
+                              <SelectTrigger id="filterDifficulty">
+                                <SelectValue placeholder="All difficulties" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="all">All difficulties</SelectItem>
+                                <SelectItem value="Easy">Easy</SelectItem>
+                                <SelectItem value="Medium">Medium</SelectItem>
+                                <SelectItem value="Hard">Hard</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="filterMarks">Marks</Label>
+                            <Select
+                              value={filters.marks}
+                              onValueChange={(value) => setFilters({...filters, marks: value})}
+                            >
+                              <SelectTrigger id="filterMarks">
+                                <SelectValue placeholder="All marks" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="all">All marks</SelectItem>
+                                <SelectItem value="1">1 mark</SelectItem>
+                                <SelectItem value="2">2 marks</SelectItem>
+                                <SelectItem value="3">3 marks</SelectItem>
+                                <SelectItem value="5">5 marks</SelectItem>
+                                <SelectItem value="10">10 marks</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        
+                        <div className="h-[300px] overflow-y-auto border rounded-md">
+                          {filteredQuestions.length > 0 ? (
+                            <div className="space-y-2 p-2">
+                              {filteredQuestions.map(question => (
+                                <div 
+                                  key={question.id} 
+                                  className="border rounded p-3 hover:bg-gray-50 cursor-pointer flex justify-between"
+                                  onClick={() => addQuestionToSection(section.id, question)}
+                                >
+                                  <div>
+                                    <div className="flex gap-2 mb-1">
+                                      <span className={`px-2 py-0.5 rounded-full text-xs ${
+                                        question.difficulty === 'Easy' ? 'bg-green-100 text-green-800' :
+                                        question.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                                        'bg-red-100 text-red-800'
+                                      }`}>
+                                        {question.difficulty}
+                                      </span>
+                                      <span className="px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-800">
+                                        {question.type}
+                                      </span>
+                                      <span className="px-2 py-0.5 rounded-full text-xs bg-purple-100 text-purple-800">
+                                        {question.marks} mark{question.marks !== 1 ? 's' : ''}
+                                      </span>
+                                    </div>
+                                    <div className="line-clamp-2 text-sm">{question.text}</div>
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      {question.chapter} | {question.topic}
+                                    </div>
+                                  </div>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="ml-2 flex-shrink-0 h-8 text-blue-600" 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      addQuestionToSection(section.id, question);
+                                    }}
+                                  >
+                                    <PlusCircle size={16} className="mr-1" />
+                                    Add
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="h-full flex items-center justify-center">
+                              <div className="text-center p-4">
+                                <Filter className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                                <p className="text-gray-500">No matching questions found</p>
+                                <p className="text-xs text-gray-400 mt-1">Try adjusting your filters</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                    
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button className="gap-2 bg-educate-400 hover:bg-educate-500">
+                          <Wand2 size={16} />
+                          Generate with AI
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Generate Question with AI</DialogTitle>
+                          <DialogDescription>
+                            Set parameters for the question you want to generate
+                          </DialogDescription>
+                        </DialogHeader>
+                        
+                        <div className="grid gap-4 py-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="aiChapter">Chapter</Label>
+                            <Select
+                              value={generationParams.chapter}
+                              onValueChange={(value) => setGenerationParams({...generationParams, chapter: value})}
+                            >
+                              <SelectTrigger id="aiChapter">
+                                <SelectValue placeholder="Select chapter" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {availableChapters.map(chapter => (
+                                  <SelectItem key={chapter} value={chapter}>{chapter}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="aiTopic">Topic</Label>
+                            <Select
+                              value={generationParams.topic}
+                              onValueChange={(value) => setGenerationParams({...generationParams, topic: value})}
+                              disabled={!generationParams.chapter}
+                            >
+                              <SelectTrigger id="aiTopic">
+                                <SelectValue placeholder={generationParams.chapter ? "Select topic" : "Select chapter first"} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {availableTopics.map(topic => (
+                                  <SelectItem key={topic} value={topic}>{topic}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="aiDifficulty">Difficulty</Label>
+                              <Select
+                                value={generationParams.difficulty}
+                                onValueChange={(value) => setGenerationParams({...generationParams, difficulty: value})}
+                              >
+                                <SelectTrigger id="aiDifficulty">
+                                  <SelectValue placeholder="Select difficulty" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Easy">Easy</SelectItem>
+                                  <SelectItem value="Medium">Medium</SelectItem>
+                                  <SelectItem value="Hard">Hard</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label htmlFor="aiType">Question Type</Label>
+                              <Select
+                                value={generationParams.type}
+                                onValueChange={(value) => setGenerationParams({...generationParams, type: value})}
+                              >
+                                <SelectTrigger id="aiType">
+                                  <SelectValue placeholder="Select type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {QUESTION_TYPES.map(type => (
+                                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="aiMarks">Marks</Label>
+                            <Select
+                              value={generationParams.marks.toString()}
+                              onValueChange={(value) => setGenerationParams({...generationParams, marks: parseInt(value)})}
+                            >
+                              <SelectTrigger id="aiMarks">
+                                <SelectValue placeholder="Select marks" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1">1 mark</SelectItem>
+                                <SelectItem value="2">2 marks</SelectItem>
+                                <SelectItem value="3">3 marks</SelectItem>
+                                <SelectItem value="5">5 marks</SelectItem>
+                                <SelectItem value="10">10 marks</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        
+                        <DialogFooter>
+                          <Button 
+                            type="submit" 
+                            className="bg-educate-400 hover:bg-educate-500"
+                            onClick={() => handleGenerateQuestion(section.id)}
+                            disabled={isGeneratingQuestion || !generationParams.chapter || !generationParams.topic}
+                          >
+                            {isGeneratingQuestion ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Generating...
+                              </>
+                            ) : (
+                              <>
+                                <Wand2 className="mr-2 h-4 w-4" />
+                                Generate Question
+                              </>
+                            )}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </CardFooter>
+                </Card>
+              ))}
+              
+              <Button variant="outline" className="w-full py-6" onClick={addNewSection}>
+                <PlusCircle className="mr-2 h-5 w-5" />
+                Add New Section
+              </Button>
+              
+              <div className="flex justify-end">
+                <Button onClick={handleSavePaper} className="bg-educate-400 hover:bg-educate-500">
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Question Paper
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </Layout>

@@ -65,7 +65,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const createQuestionPaper = (paper: Omit<QuestionPaper, 'id' | 'createdAt'>) => {
     const id = `qp-${Date.now()}`;
-    const newPaper = { ...paper, id, createdAt: new Date() };
+    const newPaper = { 
+      ...paper, 
+      id, 
+      createdAt: new Date(),
+      // Ensure we have either sections or questions depending on isSectionless
+      sections: paper.isSectionless ? undefined : (paper.sections || []),
+      questions: paper.isSectionless ? (paper.questions || []) : undefined,
+    };
     setQuestionPapers([...questionPapers, newPaper as QuestionPaper]);
     return id;
   };

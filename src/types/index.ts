@@ -1,4 +1,3 @@
-
 export type Board = 'CBSE' | 'ICSE' | 'State';
 export type Difficulty = 'Easy' | 'Medium' | 'Hard';
 export type QuestionType = 'MCQ' | 'Short Answer' | 'Long Answer' | 'Fill in the Blank' | 'Match the Following' | 'Assertion and Reason';
@@ -32,11 +31,13 @@ export interface QuestionPaper {
   createdAt: Date;
   totalMarks: number;
   duration: number; // in minutes
-  sections: Section[];
+  sections?: Section[]; // Make sections optional
+  questions?: Question[]; // Add direct questions support
   collaborators?: string[];
   isApproved?: boolean;
   schoolHeader?: string;
   instructions?: string[];
+  isSectionless?: boolean; // New flag to indicate if paper is section-less
 }
 
 export interface Section {
