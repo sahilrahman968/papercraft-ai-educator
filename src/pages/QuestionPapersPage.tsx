@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Layout } from '@/components/Layout';
 import { useData } from '@/context/DataContext';
@@ -35,7 +34,7 @@ import { generatePDF } from '@/lib/pdfGenerator';
 import { cn } from '@/lib/utils';
 
 const QuestionPapersPage: React.FC = () => {
-  const { questionPapers, deleteQuestionPaper } = useData();
+  const { questionPapers, deleteQuestionPaper, user } = useData();
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
     board: '',
@@ -48,22 +47,20 @@ const QuestionPapersPage: React.FC = () => {
   const [exportPassword, setExportPassword] = useState('');
   const [paperToExport, setPaperToExport] = useState<QuestionPaper | null>(null);
   
-  // Filter question papers based on search and filters
   const filteredPapers = questionPapers.filter(paper => {
-    // Search term filter
     const matchesSearch = 
       paper.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
       paper.subject.toLowerCase().includes(searchTerm.toLowerCase());
     
-    // Attribute filters
     const matchesBoard = filters.board ? paper.board === filters.board : true;
     const matchesClass = filters.class ? paper.class === filters.class : true;
     const matchesSubject = filters.subject ? paper.subject === filters.subject : true;
     
-    return matchesSearch && matchesBoard && matchesClass && matchesSubject;
+    const hasSubjectAccess = user?.subjects.includes(paper.subject);
+
+    return matchesSearch && matchesBoard && matchesClass && matchesSubject && hasSubjectAccess;
   });
   
-  // Sort by most recent first
   const sortedPapers = [...filteredPapers].sort((a, b) => 
     b.createdAt.getTime() - a.createdAt.getTime()
   );
@@ -128,7 +125,6 @@ const QuestionPapersPage: React.FC = () => {
           </div>
         </div>
         
-        {/* Search and Filter Bar */}
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
@@ -215,7 +211,6 @@ const QuestionPapersPage: React.FC = () => {
           </DropdownMenu>
         </div>
         
-        {/* Applied Filters Display */}
         {(Object.values(filters).some(f => f !== '') || searchTerm) && (
           <div className="flex flex-wrap items-center gap-2 pt-2">
             <span className="text-sm text-gray-500">Filters:</span>
@@ -256,7 +251,6 @@ const QuestionPapersPage: React.FC = () => {
           </div>
         )}
         
-        {/* Papers List */}
         <div className="mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sortedPapers.length > 0 ? (
@@ -403,7 +397,6 @@ const QuestionPapersPage: React.FC = () => {
           </div>
         </div>
         
-        {/* View Paper Dialog */}
         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             {viewPaper && (
@@ -416,7 +409,6 @@ const QuestionPapersPage: React.FC = () => {
                 </DialogHeader>
                 
                 <div className="space-y-6">
-                  {/* Paper metadata */}
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                     <div>
                       <div className="font-medium text-gray-500">Total Marks</div>
@@ -449,7 +441,6 @@ const QuestionPapersPage: React.FC = () => {
                     </div>
                   </div>
                   
-                  {/* Instructions */}
                   {viewPaper.instructions && viewPaper.instructions.length > 0 && (
                     <div className="rounded-lg border p-4 bg-gray-50">
                       <div className="font-medium mb-2">Instructions</div>
@@ -461,7 +452,6 @@ const QuestionPapersPage: React.FC = () => {
                     </div>
                   )}
                   
-                  {/* Sections */}
                   <div className="space-y-6">
                     {viewPaper.sections.map((section, sectionIndex) => (
                       <div key={section.id} className="border rounded-lg overflow-hidden">
@@ -487,7 +477,6 @@ const QuestionPapersPage: React.FC = () => {
                               </div>
                               <div className="mt-2">{question.text}</div>
                               
-                              {/* MCQ Options */}
                               {question.type === 'MCQ' && question.options && (
                                 <div className="mt-3 space-y-1.5">
                                   {question.options.map((option, oIndex) => (
@@ -501,7 +490,6 @@ const QuestionPapersPage: React.FC = () => {
                                 </div>
                               )}
                               
-                              {/* Question Image */}
                               {question.hasImage && question.imageUrl && (
                                 <div className="mt-3">
                                   <img 
@@ -538,7 +526,6 @@ const QuestionPapersPage: React.FC = () => {
           </DialogContent>
         </Dialog>
         
-        {/* Password Dialog for PDF Export */}
         <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>

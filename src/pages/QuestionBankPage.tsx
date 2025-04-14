@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Layout } from '@/components/Layout';
 import { useData } from '@/context/DataContext';
@@ -49,7 +48,7 @@ const DIFFICULTIES: Difficulty[] = ['Easy', 'Medium', 'Hard'];
 const BLOOM_LEVELS: BloomLevel[] = ['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'];
 
 const QuestionBankPage: React.FC = () => {
-  const { questions, addQuestion, updateQuestion, deleteQuestion } = useData();
+  const { questions, addQuestion, updateQuestion, deleteQuestion, user } = useData();
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
     type: 'all',
@@ -93,8 +92,14 @@ const QuestionBankPage: React.FC = () => {
     const matchesMarks = filters.marks ? question.marks === parseInt(filters.marks, 10) : true;
     const matchesBloomLevel = filters.bloomLevel !== 'all' ? question.bloomLevel === filters.bloomLevel : true;
 
-    return matchesSearch && matchesType && matchesBoard && matchesClass && matchesSubject && matchesChapter && matchesTopic && matchesDifficulty && matchesMarks && matchesBloomLevel;
+    const hasSubjectAccess = user?.subjects.includes(question.subject);
+
+    return matchesSearch && matchesType && matchesBoard && matchesClass && matchesSubject && 
+           matchesChapter && matchesTopic && matchesDifficulty && matchesMarks && 
+           matchesBloomLevel && hasSubjectAccess;
   });
+
+  const userSubjects = user?.subjects || [];
 
   const handleEditQuestion = (question: Question) => {
     setEditingQuestion(question);
@@ -115,8 +120,6 @@ const QuestionBankPage: React.FC = () => {
       updateQuestion(editingQuestion.id, data);
       setEditingQuestion(null);
     } else {
-      // Here we need to make sure all required fields are present
-      // The type system enforces this, but let's ensure each field is provided
       const newQuestion: Omit<Question, 'id'> = {
         text: data.text || '',
         type: data.type || 'Short Answer',
@@ -231,7 +234,7 @@ const QuestionBankPage: React.FC = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Subjects</SelectItem>
-                    {SUBJECTS.map(subject => (
+                    {userSubjects.map(subject => (
                       <SelectItem key={subject} value={subject}>{subject}</SelectItem>
                     ))}
                   </SelectContent>

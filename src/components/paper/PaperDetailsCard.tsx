@@ -1,12 +1,12 @@
-
 import React from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { CreatePaperState } from '@/hooks/useCreatePaper';
 import { Board } from '@/types';
+import { useData } from '@/context/DataContext';
 
 const BOARDS: Board[] = ['CBSE', 'ICSE', 'State'];
 const CLASSES = ['8', '9', '10', '11', '12'];
@@ -23,6 +23,9 @@ export const PaperDetailsCard: React.FC<PaperDetailsCardProps> = ({
   setPaperState,
   calculatedTotalMarks
 }) => {
+  const { user } = useData();
+  const userSubjects = user?.subjects || [];
+
   return (
     <Card className="shadow-sm">
       <CardHeader className="pb-3">
@@ -94,14 +97,14 @@ export const PaperDetailsCard: React.FC<PaperDetailsCardProps> = ({
             <Label htmlFor="subject">Subject</Label>
             <Select
               value={paperState.subject}
-              onValueChange={(value) => setPaperState(prev => ({ ...prev, subject: value }))}
+              onValueChange={(value) => setPaperState({...paperState, subject: value})}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select subject" />
               </SelectTrigger>
               <SelectContent>
-                {SUBJECTS.map(s => (
-                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                {userSubjects.map(subject => (
+                  <SelectItem key={subject} value={subject}>{subject}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

@@ -8,9 +8,40 @@ import { PaperDetailsCard } from '@/components/paper/PaperDetailsCard';
 import { PaperStructureCard } from '@/components/paper/PaperStructureCard';
 import { SectionList } from '@/components/paper/SectionList';
 import { DirectQuestionsList } from '@/components/paper/DirectQuestionsList';
+import { useData } from '@/context/DataContext';
+import { toast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 const CreatePaperPage: React.FC = () => {
   const { paperState, setPaperState, calculatedTotalMarks, handleSavePaper } = useCreatePaper();
+  const { user } = useData();
+  const navigate = useNavigate();
+
+  // Redirect if no subjects are assigned
+  React.useEffect(() => {
+    if (!user?.subjects.length) {
+      toast({
+        title: "Access Denied",
+        description: "You don't have any subjects assigned to create papers.",
+        variant: "destructive"
+      });
+      navigate('/question-papers');
+    }
+  }, [user, navigate]);
+
+  // If user has subjects, ensure the paper subject is one of them
+  React.useEffect(() => {
+    if (user?.subjects.length && !user.subjects.includes(paperState.subject)) {
+      setPaperState(prev => ({
+        ...prev,
+        subject: user.subjects[0]
+      }));
+    }
+  }, [user, paperState.subject, setPaperState]);
+
+  if (!user?.subjects.length) {
+    return null;
+  }
 
   return (
     <Layout>
