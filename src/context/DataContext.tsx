@@ -17,7 +17,7 @@ interface DataContextType {
   user: User | null;
   setUser: (user: User | null) => void;
   questions: Question[];
-  addQuestion: (question: Omit<Question, 'id'>) => void;
+  addQuestion: (question: Omit<Question, 'id'>) => string;
   updateQuestion: (id: string, question: Partial<Question>) => void;
   deleteQuestion: (id: string) => void;
   questionPapers: QuestionPaper[];

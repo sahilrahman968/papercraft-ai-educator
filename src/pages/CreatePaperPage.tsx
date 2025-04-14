@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Layout } from '@/components/Layout';
 import { useData } from '@/context/DataContext';
@@ -75,7 +74,6 @@ const TOPICS_BY_CHAPTER: Record<string, string[]> = {
   'Organic Chemistry': ['Hydrocarbons', 'Functional Groups', 'Reactions', 'Stereochemistry'],
   'Mechanics': ['Newton\'s Laws', 'Kinematics', 'Dynamics', 'Work & Energy'],
   'Cell Biology': ['Cell Structure', 'Cell Division', 'Cell Organelles', 'Cell Membranes'],
-  // Simplified for brevity
 };
 
 const QUESTION_TYPES: QuestionType[] = ['MCQ', 'Short Answer', 'Long Answer', 'Fill in the Blank', 'Match the Following', 'Assertion and Reason'];
@@ -84,7 +82,6 @@ const CreatePaperPage: React.FC = () => {
   const { questions, createQuestionPaper } = useData();
   const navigate = useNavigate();
   
-  // Paper metadata
   const [title, setTitle] = useState('');
   const [board, setBoard] = useState<Board>('CBSE');
   const [classLevel, setClassLevel] = useState('10');
@@ -98,7 +95,6 @@ const CreatePaperPage: React.FC = () => {
     'Write legibly for full marks.'
   ]);
   
-  // Paper sections
   const [sections, setSections] = useState<Section[]>([
     {
       id: `s-${Date.now()}`,
@@ -108,7 +104,6 @@ const CreatePaperPage: React.FC = () => {
     }
   ]);
   
-  // Question Bank Filtering
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
     type: '',
@@ -117,7 +112,6 @@ const CreatePaperPage: React.FC = () => {
     marks: '',
   });
   
-  // AI Question Generation
   const [isGeneratingQuestion, setIsGeneratingQuestion] = useState(false);
   const [generationParams, setGenerationParams] = useState({
     chapter: '',
@@ -127,19 +121,15 @@ const CreatePaperPage: React.FC = () => {
     marks: 3
   });
   
-  // Get filtered questions from the question bank
   const filteredQuestions = questions.filter(question => {
-    // First filter by board, class and subject
     if (question.board !== board || question.class !== classLevel || question.subject !== subject) {
       return false;
     }
     
-    // Then apply search term
     const matchesSearch = searchTerm 
       ? question.text.toLowerCase().includes(searchTerm.toLowerCase()) 
       : true;
     
-    // Then apply other filters
     const matchesType = filters.type ? question.type === filters.type : true;
     const matchesChapter = filters.chapter ? question.chapter === filters.chapter : true;
     const matchesDifficulty = filters.difficulty ? question.difficulty === filters.difficulty : true;
@@ -150,13 +140,10 @@ const CreatePaperPage: React.FC = () => {
     return matchesSearch && matchesType && matchesChapter && matchesDifficulty && matchesMarks;
   });
   
-  // Get available chapters for the selected subject
   const availableChapters = CHAPTERS_BY_SUBJECT[subject] || [];
   
-  // Get available topics for the selected chapter
   const availableTopics = TOPICS_BY_CHAPTER[generationParams.chapter] || [];
   
-  // Add a new empty section
   const addNewSection = () => {
     const newSection: Section = {
       id: `s-${Date.now()}`,
@@ -168,7 +155,6 @@ const CreatePaperPage: React.FC = () => {
     setSections([...sections, newSection]);
   };
   
-  // Remove a section
   const removeSection = (sectionId: string) => {
     if (sections.length === 1) {
       toast({
@@ -182,14 +168,12 @@ const CreatePaperPage: React.FC = () => {
     setSections(sections.filter(section => section.id !== sectionId));
   };
   
-  // Update section details
   const updateSection = (sectionId: string, updates: Partial<Section>) => {
     setSections(sections.map(section => 
       section.id === sectionId ? { ...section, ...updates } : section
     ));
   };
   
-  // Add a question to a section
   const addQuestionToSection = (sectionId: string, question: Question) => {
     setSections(sections.map(section => {
       if (section.id === sectionId) {
@@ -202,7 +186,6 @@ const CreatePaperPage: React.FC = () => {
     }));
   };
   
-  // Remove a question from a section
   const removeQuestionFromSection = (sectionId: string, questionId: string) => {
     setSections(sections.map(section => {
       if (section.id === sectionId) {
@@ -215,7 +198,6 @@ const CreatePaperPage: React.FC = () => {
     }));
   };
   
-  // Move a question up in the section
   const moveQuestionUp = (sectionId: string, questionIndex: number) => {
     if (questionIndex === 0) return;
     
@@ -234,7 +216,6 @@ const CreatePaperPage: React.FC = () => {
     }));
   };
   
-  // Move a question down in the section
   const moveQuestionDown = (sectionId: string, questionIndex: number) => {
     setSections(sections.map(section => {
       if (section.id === sectionId && questionIndex < section.questions.length - 1) {
@@ -251,7 +232,6 @@ const CreatePaperPage: React.FC = () => {
     }));
   };
   
-  // Regenerate a question with AI
   const handleRegenerateQuestion = async (sectionId: string, questionId: string) => {
     const section = sections.find(s => s.id === sectionId);
     if (!section) return;
@@ -271,7 +251,6 @@ const CreatePaperPage: React.FC = () => {
         question.marks
       );
       
-      // Replace the question
       setSections(sections.map(s => {
         if (s.id === sectionId) {
           return {
@@ -298,7 +277,6 @@ const CreatePaperPage: React.FC = () => {
     }
   };
   
-  // Generate a new question with AI
   const handleGenerateQuestion = async (sectionId: string) => {
     setIsGeneratingQuestion(true);
     
@@ -330,13 +308,11 @@ const CreatePaperPage: React.FC = () => {
     }
   };
   
-  // Calculate total marks of the paper
   const calculatedTotalMarks = sections.reduce(
     (sum, section) => sum + section.questions.reduce((qSum, q) => qSum + q.marks, 0), 
     0
   );
   
-  // Save the question paper
   const handleSavePaper = () => {
     if (!title.trim()) {
       toast({
@@ -401,7 +377,6 @@ const CreatePaperPage: React.FC = () => {
           </Button>
         </div>
         
-        {/* Paper Metadata */}
         <Card className="shadow-sm">
           <CardHeader className="pb-3">
             <CardTitle>Paper Details</CardTitle>
@@ -531,7 +506,6 @@ const CreatePaperPage: React.FC = () => {
           </CardFooter>
         </Card>
         
-        {/* Section Management */}
         <div className="space-y-6">
           {sections.map((section, sectionIndex) => (
             <Card key={section.id} className="shadow-sm">
@@ -572,7 +546,6 @@ const CreatePaperPage: React.FC = () => {
               </CardHeader>
               
               <CardContent>
-                {/* Questions */}
                 <div className="space-y-4">
                   {section.questions.length > 0 ? (
                     section.questions.map((question, questionIndex) => (
@@ -639,7 +612,6 @@ const CreatePaperPage: React.FC = () => {
                         <div className="p-4">
                           <div className="text-gray-800">{question.text}</div>
                           
-                          {/* MCQ Options */}
                           {question.type === 'MCQ' && question.options && (
                             <div className="mt-3 space-y-1.5">
                               {question.options.map((option, oIndex) => (
@@ -653,7 +625,6 @@ const CreatePaperPage: React.FC = () => {
                             </div>
                           )}
                           
-                          {/* Question Image */}
                           {question.hasImage && question.imageUrl && (
                             <div className="mt-3">
                               <img 
@@ -677,7 +648,6 @@ const CreatePaperPage: React.FC = () => {
               </CardContent>
               
               <CardFooter className="flex gap-4 border-t p-4 bg-gray-50">
-                {/* Add Question Buttons */}
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button variant="outline" className="gap-2">
@@ -970,13 +940,11 @@ const CreatePaperPage: React.FC = () => {
             </Card>
           ))}
           
-          {/* Add Section Button */}
           <Button variant="outline" className="w-full py-6" onClick={addNewSection}>
             <PlusCircle className="mr-2 h-5 w-5" />
             Add New Section
           </Button>
           
-          {/* Save Button */}
           <div className="flex justify-end">
             <Button onClick={handleSavePaper} className="bg-educate-400 hover:bg-educate-500">
               <Save className="mr-2 h-4 w-4" />
