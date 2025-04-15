@@ -17,8 +17,8 @@ export const QuestionBankSelector: React.FC<QuestionBankSelectorProps> = ({ onSe
   const { questions } = useData();
   const [filters, setFilters] = useState({
     searchTerm: '',
-    type: '' as QuestionType | '',
-    difficulty: '' as Difficulty | '',
+    type: 'all-types' as QuestionType | 'all-types',
+    difficulty: 'all-difficulties' as Difficulty | 'all-difficulties',
     chapter: '',
     topic: ''
   });
@@ -27,8 +27,8 @@ export const QuestionBankSelector: React.FC<QuestionBankSelectorProps> = ({ onSe
     return (
       q.subject === subject &&
       (!filters.searchTerm || q.text.toLowerCase().includes(filters.searchTerm.toLowerCase())) &&
-      (!filters.type || q.type === filters.type) &&
-      (!filters.difficulty || q.difficulty === filters.difficulty) &&
+      (filters.type === 'all-types' || q.type === filters.type) &&
+      (filters.difficulty === 'all-difficulties' || q.difficulty === filters.difficulty) &&
       (!filters.chapter || q.chapter.toLowerCase().includes(filters.chapter.toLowerCase())) &&
       (!filters.topic || q.topic.toLowerCase().includes(filters.topic.toLowerCase()))
     );
@@ -51,18 +51,48 @@ export const QuestionBankSelector: React.FC<QuestionBankSelectorProps> = ({ onSe
           <Label>Question Type</Label>
           <Select
             value={filters.type}
-            onValueChange={(value: QuestionType | '') => setFilters(f => ({ ...f, type: value }))}
+            onValueChange={(value: QuestionType | 'all-types') => setFilters(f => ({ ...f, type: value }))}
           >
             <SelectTrigger>
               <SelectValue placeholder="All types" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All types</SelectItem>
+              <SelectItem value="all-types">All types</SelectItem>
               {QUESTION_TYPES.map(type => (
                 <SelectItem key={type} value={type}>{type}</SelectItem>
               ))}
             </SelectContent>
           </Select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+        <div className="space-y-2">
+          <Label>Difficulty</Label>
+          <Select
+            value={filters.difficulty}
+            onValueChange={(value: Difficulty | 'all-difficulties') => setFilters(f => ({ ...f, difficulty: value }))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="All difficulties" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all-difficulties">All difficulties</SelectItem>
+              {DIFFICULTY_LEVELS.map(level => (
+                <SelectItem key={level} value={level}>{level}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="chapter">Chapter</Label>
+          <Input
+            id="chapter"
+            placeholder="Filter by chapter"
+            value={filters.chapter}
+            onChange={(e) => setFilters(f => ({ ...f, chapter: e.target.value }))}
+          />
         </div>
       </div>
 

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { User, Plus, X, Check, Edit, Trash2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { v4 as uuidv4 } from 'uuid'; // We'll implement a similar function without the package
 
 // Mock function to generate unique IDs
 const generateId = () => `t-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
