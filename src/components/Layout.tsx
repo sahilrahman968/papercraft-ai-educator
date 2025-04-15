@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { 
   FileText, 
@@ -10,9 +10,11 @@ import {
   LogOut,
   BookOpen,
   Menu,
-  X
+  X,
+  Users,
+  School,
 } from 'lucide-react';
-import { useData } from '@/context/DataContext';
+import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 
 interface LayoutProps {
@@ -20,19 +22,41 @@ interface LayoutProps {
 }
 
 export function Layout({ children }: LayoutProps) {
-  const { user } = useData();
+  const { currentUser, logout, isAdmin } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = React.useState(false);
   
   const toggleMenu = () => setMenuOpen(!menuOpen);
   
-  const navItems = [
-    { path: '/', label: 'Home', icon: Home },
-    { path: '/question-bank', label: 'Question Bank', icon: Database },
-    { path: '/question-papers', label: 'Question Papers', icon: FileText },
-    { path: '/create-paper', label: 'Create Paper', icon: BookOpen },
-    { path: '/settings', label: 'Settings', icon: Settings },
-  ];
+  // Define navigation items based on user role
+  const getNavItems = () => {
+    const teacherItems = [
+      { path: '/', label: 'Home', icon: Home },
+      { path: '/question-bank', label: 'Question Bank', icon: Database },
+      { path: '/question-papers', label: 'Question Papers', icon: FileText },
+      { path: '/create-paper', label: 'Create Paper', icon: BookOpen },
+      { path: '/settings', label: 'Settings', icon: Settings },
+    ];
+    
+    const adminItems = [
+      { path: '/admin-dashboard', label: 'Dashboard', icon: Home },
+      { path: '/admin-dashboard', label: 'Teacher Management', icon: Users },
+      { path: '/question-papers', label: 'Question Papers', icon: FileText },
+      { path: '/settings', label: 'Settings', icon: Settings },
+    ];
+    
+    return isAdmin ? adminItems : teacherItems;
+  };
+  
+  const navItems = getNavItems();
+  
+  // If no user is logged in, redirect to login
+  React.useEffect(() => {
+    if (!currentUser && location.pathname !== '/login') {
+      navigate('/login');
+    }
+  }, [currentUser, location.pathname, navigate]);
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -40,7 +64,11 @@ export function Layout({ children }: LayoutProps) {
       <header className="bg-educate-400 text-white shadow-md">
         <div className="container mx-auto px-4 py-3 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <BookOpen className="h-6 w-6" />
+            {isAdmin ? (
+              <School className="h-6 w-6" />
+            ) : (
+              <BookOpen className="h-6 w-6" />
+            )}
             <h1 className="text-xl font-bold">EduQuest</h1>
           </div>
           
@@ -51,13 +79,18 @@ export function Layout({ children }: LayoutProps) {
           </div>
           
           <div className="hidden md:flex items-center gap-4">
-            {user && (
+            {currentUser && (
               <>
                 <div className="text-sm">
-                  <div className="font-medium">{user.name}</div>
-                  <div className="text-xs opacity-80">{user.school}</div>
+                  <div className="font-medium">{currentUser.name}</div>
+                  <div className="text-xs opacity-80">{currentUser.school}</div>
                 </div>
-                <Button variant="ghost" size="icon" className="text-white hover:bg-educate-500">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-white hover:bg-educate-500"
+                  onClick={logout}
+                >
                   <LogOut className="h-5 w-5" />
                 </Button>
               </>
@@ -86,10 +119,10 @@ export function Layout({ children }: LayoutProps) {
               </Button>
             </div>
             
-            {user && (
+            {currentUser && (
               <div className="border-b pb-4 mb-4">
-                <div className="font-medium">{user.name}</div>
-                <div className="text-sm text-gray-600">{user.school}</div>
+                <div className="font-medium">{currentUser.name}</div>
+                <div className="text-sm text-gray-600">{currentUser.school}</div>
               </div>
             )}
             
@@ -113,7 +146,14 @@ export function Layout({ children }: LayoutProps) {
             </nav>
             
             <div className="mt-auto pt-4 border-t">
-              <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-gray-700 hover:bg-gray-100" 
+                onClick={() => {
+                  setMenuOpen(false);
+                  logout();
+                }}
+              >
                 <LogOut className="h-5 w-5 mr-3" />
                 Log Out
               </Button>
