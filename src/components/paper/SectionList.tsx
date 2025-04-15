@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
 import { QuestionAddModal } from './question/QuestionAddModal';
+import { Question } from '@/types';
 
 interface SectionListProps {
   paperState: CreatePaperState;

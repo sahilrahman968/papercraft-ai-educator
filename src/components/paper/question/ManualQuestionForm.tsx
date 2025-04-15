@@ -5,16 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Question, QuestionType, Difficulty, BloomLevel } from '@/types';
+import { Question, QuestionType, Difficulty, BloomLevel, QUESTION_TYPES, DIFFICULTY_LEVELS, BLOOM_LEVELS } from '@/types';
 
 interface ManualQuestionFormProps {
   onSubmit: (question: Question) => void;
   subject: string;
 }
-
-const QUESTION_TYPES: QuestionType[] = ['MCQ', 'Short Answer', 'Long Answer', 'Fill in the Blank', 'Match the Following', 'Assertion and Reason'];
-const DIFFICULTY_LEVELS: Difficulty[] = ['Easy', 'Medium', 'Hard'];
-const BLOOM_LEVELS: BloomLevel[] = ['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'];
 
 export const ManualQuestionForm: React.FC<ManualQuestionFormProps> = ({ onSubmit, subject }) => {
   const [questionData, setQuestionData] = useState({

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Question, QuestionType, Difficulty, BloomLevel } from '@/types';
+import { Question, QuestionType, Difficulty, BloomLevel, QUESTION_TYPES, DIFFICULTY_LEVELS, BLOOM_LEVELS } from '@/types';
 import { Wand2 } from 'lucide-react';
 
 interface AIQuestionGeneratorProps {
@@ -82,7 +82,7 @@ export const AIQuestionGenerator: React.FC<AIQuestionGeneratorProps> = ({ onGene
               <SelectValue placeholder="Select type" />
             </SelectTrigger>
             <SelectContent>
-              {Object.values(QuestionType).map(type => (
+              {QUESTION_TYPES.map(type => (
                 <SelectItem key={type} value={type}>{type}</SelectItem>
               ))}
             </SelectContent>
@@ -99,7 +99,7 @@ export const AIQuestionGenerator: React.FC<AIQuestionGeneratorProps> = ({ onGene
               <SelectValue placeholder="Select difficulty" />
             </SelectTrigger>
             <SelectContent>
-              {Object.values(Difficulty).map(level => (
+              {DIFFICULTY_LEVELS.map(level => (
                 <SelectItem key={level} value={level}>{level}</SelectItem>
               ))}
             </SelectContent>
@@ -128,7 +128,7 @@ export const AIQuestionGenerator: React.FC<AIQuestionGeneratorProps> = ({ onGene
               <SelectValue placeholder="Select level" />
             </SelectTrigger>
             <SelectContent>
-              {Object.values(BloomLevel).map(level => (
+              {BLOOM_LEVELS.map(level => (
                 <SelectItem key={level} value={level}>{level}</SelectItem>
               ))}
             </SelectContent>

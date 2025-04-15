@@ -5,6 +5,7 @@ import { CreatePaperState } from '@/hooks/useCreatePaper';
 import { Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { QuestionAddModal } from './question/QuestionAddModal';
+import { Question } from '@/types';
 
 interface DirectQuestionsListProps {
   paperState: CreatePaperState;

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Question, QuestionType, Difficulty } from '@/types';
+import { Question, QuestionType, Difficulty, QUESTION_TYPES, DIFFICULTY_LEVELS } from '@/types';
 import { useData } from '@/context/DataContext';
 import { Search } from 'lucide-react';
 
@@ -58,7 +58,7 @@ export const QuestionBankSelector: React.FC<QuestionBankSelectorProps> = ({ onSe
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="">All types</SelectItem>
-              {Object.values(QuestionType).map(type => (
+              {QUESTION_TYPES.map(type => (
                 <SelectItem key={type} value={type}>{type}</SelectItem>
               ))}
             </SelectContent>

@@ -1,7 +1,39 @@
+
 export type Board = 'CBSE' | 'ICSE' | 'State';
-export type Difficulty = 'Easy' | 'Medium' | 'Hard';
-export type QuestionType = 'MCQ' | 'Short Answer' | 'Long Answer' | 'Fill in the Blank' | 'Match the Following' | 'Assertion and Reason';
-export type BloomLevel = 'Remember' | 'Understand' | 'Apply' | 'Analyze' | 'Evaluate' | 'Create';
+export const BOARDS: Board[] = ['CBSE', 'ICSE', 'State'];
+
+export enum QuestionTypeEnum {
+  MCQ = 'MCQ',
+  SHORT_ANSWER = 'Short Answer',
+  LONG_ANSWER = 'Long Answer',
+  FILL_IN_THE_BLANK = 'Fill in the Blank',
+  MATCH_THE_FOLLOWING = 'Match the Following',
+  ASSERTION_AND_REASON = 'Assertion and Reason'
+}
+
+export type QuestionType = `${QuestionTypeEnum}`;
+export const QUESTION_TYPES: QuestionType[] = Object.values(QuestionTypeEnum) as QuestionType[];
+
+export enum DifficultyEnum {
+  EASY = 'Easy',
+  MEDIUM = 'Medium',
+  HARD = 'Hard'
+}
+
+export type Difficulty = `${DifficultyEnum}`;
+export const DIFFICULTY_LEVELS: Difficulty[] = Object.values(DifficultyEnum) as Difficulty[];
+
+export enum BloomLevelEnum {
+  REMEMBER = 'Remember',
+  UNDERSTAND = 'Understand',
+  APPLY = 'Apply',
+  ANALYZE = 'Analyze',
+  EVALUATE = 'Evaluate',
+  CREATE = 'Create'
+}
+
+export type BloomLevel = `${BloomLevelEnum}`;
+export const BLOOM_LEVELS: BloomLevel[] = Object.values(BloomLevelEnum) as BloomLevel[];
 
 export interface Question {
   id: string;
