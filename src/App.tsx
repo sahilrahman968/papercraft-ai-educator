@@ -12,6 +12,7 @@ import LoginPage from "./pages/LoginPage";
 import NotFound from "./pages/NotFound";
 import QuestionBankPage from "./pages/QuestionBankPage";
 import QuestionPapersPage from "./pages/QuestionPapersPage";
+import CreatePaperOptionsPage from "./pages/CreatePaperOptionsPage";
 import CreatePaperPage from "./pages/CreatePaperPage";
 import EditPaperPage from "./pages/EditPaperPage";
 import GeneratePaperPage from "./pages/GeneratePaperPage";
@@ -53,19 +54,25 @@ const App = () => (
               
               <Route path="/create-paper" element={
                 <ProtectedRoute>
+                  <CreatePaperOptionsPage />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/create-paper/manual" element={
+                <ProtectedRoute>
                   <CreatePaperPage />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/create-paper/generate-paper" element={
+                <ProtectedRoute>
+                  <GeneratePaperPage />
                 </ProtectedRoute>
               } />
               
               <Route path="/edit-paper/:paperId" element={
                 <ProtectedRoute>
                   <EditPaperPage />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/generate-paper" element={
-                <ProtectedRoute>
-                  <GeneratePaperPage />
                 </ProtectedRoute>
               } />
               
