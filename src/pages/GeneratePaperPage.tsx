@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Layout } from '@/components/Layout';
 import { useData } from '@/context/DataContext';
@@ -58,6 +59,7 @@ const GeneratePaperPage: React.FC = () => {
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [useAllTopics, setUseAllTopics] = useState(true);
   const [difficulty, setDifficulty] = useState<[number, number, number]>([30, 50, 20]); // Easy, Medium, Hard
+  const [easyPercentage, setEasyPercentage] = useState(30); // Track easy percentage separately
   const [totalMarks, setTotalMarks] = useState(100);
   const [duration, setDuration] = useState(180); // 3 hours
   const [isGenerating, setIsGenerating] = useState(false);
@@ -100,8 +102,16 @@ const GeneratePaperPage: React.FC = () => {
   
   const handleDifficultyChange = (value: number[]) => {
     const newEasy = value[0];
-    const newMedium = Math.round((100 - newEasy) * (difficulty[1] / (difficulty[1] + difficulty[2])));
-    const newHard = 100 - newEasy - newMedium;
+    setEasyPercentage(newEasy);
+    
+    // Maintain the ratio between medium and hard for the remaining percentage
+    const remaining = 100 - newEasy;
+    
+    // If difficulty[1] + difficulty[2] is 0, use default ratio of 70:30
+    const mediumRatio = (difficulty[1] + difficulty[2]) === 0 ? 0.7 : difficulty[1] / (difficulty[1] + difficulty[2]);
+    
+    const newMedium = Math.round(remaining * mediumRatio);
+    const newHard = remaining - newMedium;
     
     setDifficulty([newEasy, newMedium, newHard]);
   };
@@ -330,13 +340,13 @@ const GeneratePaperPage: React.FC = () => {
                   <div>
                     <div className="flex justify-between mb-2">
                       <span className="text-sm font-medium">Easy</span>
-                      <span className="text-sm font-medium">{difficulty[0]}%</span>
+                      <span className="text-sm font-medium">{easyPercentage}%</span>
                     </div>
                     <Slider
-                      defaultValue={[difficulty[0]]}
+                      defaultValue={[easyPercentage]}
                       max={100}
                       step={5}
-                      value={[difficulty[0]]}
+                      value={[easyPercentage]}
                       onValueChange={handleDifficultyChange}
                       className="py-4"
                     />

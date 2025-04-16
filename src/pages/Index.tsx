@@ -1,3 +1,4 @@
+
 import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -59,7 +60,7 @@ const Index = () => {
               </CardContent>
               <CardFooter>
                 <Button asChild className="bg-educate-400 hover:bg-educate-500 w-full">
-                  <Link to="/generate-paper">Create AI Paper</Link>
+                  <Link to="/create-paper/generate-paper">Create AI Paper</Link>
                 </Button>
               </CardFooter>
             </Card>
@@ -81,7 +82,7 @@ const Index = () => {
               </CardContent>
               <CardFooter>
                 <Button asChild variant="outline" className="w-full">
-                  <Link to="/create-paper">Create Custom Paper</Link>
+                  <Link to="/create-paper/manual">Create Custom Paper</Link>
                 </Button>
               </CardFooter>
             </Card>
