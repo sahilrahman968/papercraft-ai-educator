@@ -1,4 +1,3 @@
-
 import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -36,6 +35,56 @@ const Index = () => {
                 Manage Question Bank
               </Link>
             </Button>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
+          <div className="grid gap-6 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3">
+                  <Wand2 className="h-6 w-6 text-educate-400" />
+                  Generate with AI
+                </CardTitle>
+                <CardDescription>
+                  Create a complete question paper with AI assistance
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  Select parameters like board, class, subject, and let AI generate a fully structured question paper with appropriate difficulty distribution.
+                </p>
+              </CardContent>
+              <CardFooter>
+                <Button asChild className="bg-educate-400 hover:bg-educate-500 w-full">
+                  <Link to="/generate-paper">Create AI Paper</Link>
+                </Button>
+              </CardFooter>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3">
+                  <BookOpen className="h-6 w-6 text-educate-400" />
+                  Build Manually
+                </CardTitle>
+                <CardDescription>
+                  Create a custom question paper from scratch
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  Design your own paper with full control. Add sections, pick questions from the question bank, or write custom questions.
+                </p>
+              </CardContent>
+              <CardFooter>
+                <Button asChild variant="outline" className="w-full">
+                  <Link to="/create-paper">Create Custom Paper</Link>
+                </Button>
+              </CardFooter>
+            </Card>
           </div>
         </div>
         
@@ -158,56 +207,6 @@ const Index = () => {
                 </div>
               </div>
             )}
-          </div>
-        </div>
-        
-        {/* Quick Actions */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                  <Wand2 className="h-6 w-6 text-educate-400" />
-                  Generate with AI
-                </CardTitle>
-                <CardDescription>
-                  Create a complete question paper with AI assistance
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  Select parameters like board, class, subject, and let AI generate a fully structured question paper with appropriate difficulty distribution.
-                </p>
-              </CardContent>
-              <CardFooter>
-                <Button asChild className="bg-educate-400 hover:bg-educate-500 w-full">
-                  <Link to="/generate-paper">Create AI Paper</Link>
-                </Button>
-              </CardFooter>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                  <BookOpen className="h-6 w-6 text-educate-400" />
-                  Build Manually
-                </CardTitle>
-                <CardDescription>
-                  Create a custom question paper from scratch
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  Design your own paper with full control. Add sections, pick questions from the question bank, or write custom questions.
-                </p>
-              </CardContent>
-              <CardFooter>
-                <Button asChild variant="outline" className="w-full">
-                  <Link to="/create-paper">Create Custom Paper</Link>
-                </Button>
-              </CardFooter>
-            </Card>
           </div>
         </div>
       </div>
