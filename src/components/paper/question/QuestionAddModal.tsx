@@ -174,8 +174,8 @@ export const QuestionAddModal: React.FC<QuestionAddModalProps> = ({
           Add Question
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
-        <DialogHeader>
+      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col overflow-hidden p-0">
+        <DialogHeader className="px-6 pt-6 pb-2">
           <DialogTitle>Add Question</DialogTitle>
         </DialogHeader>
         
@@ -185,15 +185,15 @@ export const QuestionAddModal: React.FC<QuestionAddModalProps> = ({
           value={selectedTab}
           onValueChange={setSelectedTab}
         >
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-3 px-6">
             <TabsTrigger value="manual">Manual Entry</TabsTrigger>
             <TabsTrigger value="bank">Question Bank</TabsTrigger>
             <TabsTrigger value="ai">AI Generate</TabsTrigger>
           </TabsList>
           
-          <ScrollArea className="flex-1 overflow-auto mt-4">
-            <div className="px-1">
-              <TabsContent value="manual" className="mt-0">
+          <ScrollArea className="flex-1 overflow-auto h-[calc(90vh-8rem)]">
+            <div className="px-6 py-4">
+              <TabsContent value="manual" className="mt-0 data-[state=active]:flex data-[state=active]:flex-col h-full">
                 <ManualQuestionForm onSubmit={handleQuestionAdded} subject={subject} />
               </TabsContent>
               
