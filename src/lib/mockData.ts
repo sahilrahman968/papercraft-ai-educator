@@ -5,7 +5,7 @@ import { Board, Difficulty, Question, QuestionPaper, QuestionType, BloomLevel, S
 const SUBJECTS = ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'English', 'History', 'Geography'];
 const CLASSES = ['8', '9', '10', '11', '12'];
 const BOARDS: Board[] = ['CBSE', 'ICSE', 'State'];
-const QUESTION_TYPES: QuestionType[] = ['MCQ', 'Short Answer', 'Long Answer', 'Fill in the Blank', 'Match the Following', 'Assertion and Reason'];
+const QUESTION_TYPES: QuestionType[] = ['MCQ', 'Short Answer', 'Long Answer', 'Fill in the Blank', 'Match the Following', 'Assertion and Reason', 'Comprehension'];
 const DIFFICULTY_LEVELS: Difficulty[] = ['Easy', 'Medium', 'Hard'];
 const BLOOM_LEVELS: BloomLevel[] = ['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'];
 
@@ -94,6 +94,13 @@ function generateQuestionText(subject: string, chapter: string, topic: string, d
       `Assertion: The principles of ${topic} are widely applied.\nReason: ${chapter} relies heavily on these principles.`,
       `Assertion: ${topic} can be observed in various scenarios.\nReason: This is due to the universal nature of ${chapter}.`,
       `Assertion: ${chapter} is essential to understand ${topic}.\nReason: ${subject} concepts build upon this relationship.`
+    ],
+    // Add the missing 'Comprehension' property
+    'Comprehension': [
+      `Read the following passage about ${topic} and answer the questions that follow:`,
+      `Study the text about ${topic} in ${chapter} and respond to the subsequent questions:`,
+      `Analyze this excerpt about ${topic} and address the questions below:`,
+      `Examine the following information on ${topic} and solve the related questions:`
     ]
   };
 
