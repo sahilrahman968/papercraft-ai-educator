@@ -8,7 +8,8 @@ export enum QuestionTypeEnum {
   LONG_ANSWER = 'Long Answer',
   FILL_IN_THE_BLANK = 'Fill in the Blank',
   MATCH_THE_FOLLOWING = 'Match the Following',
-  ASSERTION_AND_REASON = 'Assertion and Reason'
+  ASSERTION_AND_REASON = 'Assertion and Reason',
+  COMPREHENSION = 'Comprehension'
 }
 
 export type QuestionType = `${QuestionTypeEnum}`;
@@ -35,6 +36,20 @@ export enum BloomLevelEnum {
 export type BloomLevel = `${BloomLevelEnum}`;
 export const BLOOM_LEVELS: BloomLevel[] = Object.values(BloomLevelEnum) as BloomLevel[];
 
+export interface MatchPair {
+  left: string;
+  right: string;
+}
+
+export interface SubQuestion {
+  id: string;
+  text: string;
+  marks: number;
+  type: QuestionType;
+  options?: string[];
+  answer?: string;
+}
+
 export interface Question {
   id: string;
   text: string;
@@ -49,6 +64,10 @@ export interface Question {
   bloomLevel: BloomLevel;
   answer?: string;
   options?: string[]; // For MCQs
+  matchPairs?: MatchPair[]; // For Match the Following
+  subQuestions?: SubQuestion[]; // For Comprehension
+  assertionText?: string; // For Assertion and Reason
+  reasonText?: string; // For Assertion and Reason
   hasImage?: boolean;
   imageUrl?: string;
   isAiGenerated?: boolean;

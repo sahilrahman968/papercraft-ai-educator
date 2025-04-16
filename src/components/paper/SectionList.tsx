@@ -9,7 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
 import { QuestionAddModal } from './question/QuestionAddModal';
-import { Question } from '@/types';
+import { Question, QuestionType } from '@/types';
+import { Badge } from '@/components/ui/badge';
 
 interface SectionListProps {
   paperState: CreatePaperState;
@@ -21,6 +22,7 @@ export const SectionList: React.FC<SectionListProps> = ({
   setPaperState 
 }) => {
   const [openSectionId, setOpenSectionId] = useState<string | null>(null);
+  const [expandedQuestions, setExpandedQuestions] = useState<Record<string, string[]>>({});
 
   const addNewSection = () => {
     setPaperState(prev => ({
@@ -39,6 +41,27 @@ export const SectionList: React.FC<SectionListProps> = ({
 
   const toggleSection = (sectionId: string) => {
     setOpenSectionId(openSectionId === sectionId ? null : sectionId);
+  };
+
+  const toggleQuestionExpand = (sectionId: string, questionId: string) => {
+    setExpandedQuestions(prev => {
+      const currentExpanded = prev[sectionId] || [];
+      if (currentExpanded.includes(questionId)) {
+        return {
+          ...prev,
+          [sectionId]: currentExpanded.filter(id => id !== questionId)
+        };
+      } else {
+        return {
+          ...prev,
+          [sectionId]: [...currentExpanded, questionId]
+        };
+      }
+    });
+  };
+
+  const isQuestionExpanded = (sectionId: string, questionId: string) => {
+    return (expandedQuestions[sectionId] || []).includes(questionId);
   };
 
   const addQuestionToSection = (sectionId: string, question: Question) => {
@@ -91,6 +114,101 @@ export const SectionList: React.FC<SectionListProps> = ({
       ...prev,
       sections: prev.sections.filter(section => section.id !== sectionId)
     }));
+  };
+
+  const renderQuestionDetails = (question: Question) => {
+    switch(question.type) {
+      case 'MCQ':
+        return (
+          <div className="mt-2 pl-4 space-y-1">
+            <p className="text-sm font-medium">Options:</p>
+            <ul className="list-disc list-inside text-sm pl-2">
+              {question.options?.map((option, i) => (
+                <li key={i} className={question.answer === option ? "font-medium text-green-600" : ""}>
+                  {option} {question.answer === option && "(Correct)"}
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+        
+      case 'Match the Following':
+        return (
+          <div className="mt-2 pl-4 space-y-1">
+            <p className="text-sm font-medium">Match Pairs:</p>
+            <div className="grid grid-cols-2 gap-2 mt-1">
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-gray-500">Column A</p>
+                {question.matchPairs?.map((pair, i) => (
+                  <div key={i} className="border p-1 rounded text-sm">{pair.left}</div>
+                ))}
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-gray-500">Column B</p>
+                {question.matchPairs?.map((pair, i) => (
+                  <div key={i} className="border p-1 rounded text-sm">{pair.right}</div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+        
+      case 'Comprehension':
+        return (
+          <div className="mt-2 pl-4 space-y-2">
+            <div className="bg-gray-50 p-2 rounded text-sm">
+              <p className="font-medium mb-1">Passage:</p>
+              <p>{question.text}</p>
+            </div>
+            <p className="text-sm font-medium">Sub Questions:</p>
+            <div className="space-y-2 pl-4">
+              {question.subQuestions?.map((subQ, i) => (
+                <div key={subQ.id} className="border-l-2 pl-2">
+                  <p className="text-sm font-medium">Q{i+1}. {subQ.text} ({subQ.marks} marks)</p>
+                  {subQ.options && subQ.options.length > 0 && (
+                    <div className="mt-1">
+                      <p className="text-xs font-medium">Options:</p>
+                      <ul className="list-disc list-inside text-xs pl-2">
+                        {subQ.options.map((opt, j) => (
+                          <li key={j} className={subQ.answer === opt ? "font-medium text-green-600" : ""}>
+                            {opt}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {subQ.answer && <p className="text-xs mt-1"><span className="font-medium">Answer:</span> {subQ.answer}</p>}
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+        
+      case 'Assertion and Reason':
+        return (
+          <div className="mt-2 pl-4 space-y-2">
+            <div>
+              <p className="text-sm font-medium">Assertion:</p>
+              <p className="text-sm pl-2">{question.assertionText}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium">Reason:</p>
+              <p className="text-sm pl-2">{question.reasonText}</p>
+            </div>
+            {question.answer && (
+              <p className="text-sm"><span className="font-medium">Answer:</span> {question.answer}</p>
+            )}
+          </div>
+        );
+        
+      default:
+        return question.answer ? (
+          <div className="mt-2 pl-4">
+            <p className="text-sm font-medium">Answer:</p>
+            <p className="text-sm pl-2">{question.answer}</p>
+          </div>
+        ) : null;
+    }
   };
 
   return (
@@ -195,27 +313,68 @@ export const SectionList: React.FC<SectionListProps> = ({
                       ) : (
                         <div className="space-y-3">
                           {section.questions.map((question, qIndex) => (
-                            <div key={question.id} className="border rounded-md p-3 bg-white">
-                              <div className="flex justify-between">
-                                <span className="font-medium">Q{qIndex + 1}. ({question.marks} marks)</span>
-                                <div>
-                                  <span className="text-sm bg-gray-100 px-2 py-1 rounded mr-2">{question.type}</span>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm"
-                                    onClick={() => removeQuestion(section.id, question.id)}
-                                  >
-                                    <Trash2 className="h-4 w-4 text-red-500" />
-                                  </Button>
+                            <Collapsible
+                              key={question.id}
+                              open={isQuestionExpanded(section.id, question.id)}
+                              onOpenChange={() => toggleQuestionExpand(section.id, question.id)}
+                              className="border rounded-md overflow-hidden"
+                            >
+                              <CollapsibleTrigger asChild>
+                                <div className="p-3 hover:bg-gray-50 cursor-pointer">
+                                  <div className="flex justify-between items-start">
+                                    <div>
+                                      <div className="flex items-center">
+                                        <span className="font-medium mr-2">Q{qIndex + 1}.</span>
+                                        <Badge className="mr-2">{question.type}</Badge>
+                                        <Badge variant="outline">{question.marks} marks</Badge>
+                                      </div>
+                                      <p className="mt-1 pr-8 text-sm">
+                                        {question.type === 'Comprehension' 
+                                          ? 'Comprehension Passage'
+                                          : question.text.length > 80 
+                                            ? `${question.text.substring(0, 80)}...` 
+                                            : question.text
+                                        }
+                                      </p>
+                                    </div>
+                                    <div className="flex items-center">
+                                      {isQuestionExpanded(section.id, question.id) 
+                                        ? <ChevronUp className="h-4 w-4 text-gray-500" /> 
+                                        : <ChevronDown className="h-4 w-4 text-gray-500" />
+                                      }
+                                    </div>
+                                  </div>
+                                  <div className="flex mt-1 text-xs text-gray-500 space-x-2">
+                                    <span>{question.difficulty}</span>
+                                    <span>•</span>
+                                    <span>{question.bloomLevel}</span>
+                                  </div>
                                 </div>
-                              </div>
-                              <p className="mt-2 text-gray-700">{question.text}</p>
-                              <div className="flex mt-2 text-xs text-gray-500 space-x-2">
-                                <span>{question.difficulty}</span>
-                                <span>•</span>
-                                <span>{question.bloomLevel}</span>
-                              </div>
-                            </div>
+                              </CollapsibleTrigger>
+                              <CollapsibleContent>
+                                <div className="px-3 pb-3 pt-0 border-t">
+                                  {question.type !== 'Comprehension' && (
+                                    <div className="mt-2">
+                                      <p className="font-medium">Question:</p>
+                                      <p className="pl-4 text-sm">{question.text}</p>
+                                    </div>
+                                  )}
+                                  
+                                  {renderQuestionDetails(question)}
+                                  
+                                  <div className="mt-3 flex justify-end">
+                                    <Button 
+                                      variant="destructive" 
+                                      size="sm"
+                                      onClick={() => removeQuestion(section.id, question.id)}
+                                    >
+                                      <Trash2 className="h-4 w-4 mr-1" />
+                                      Remove
+                                    </Button>
+                                  </div>
+                                </div>
+                              </CollapsibleContent>
+                            </Collapsible>
                           ))}
                         </div>
                       )}
