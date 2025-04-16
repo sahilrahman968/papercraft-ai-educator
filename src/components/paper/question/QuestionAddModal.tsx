@@ -181,7 +181,7 @@ export const QuestionAddModal: React.FC<QuestionAddModalProps> = ({
         
         <Tabs 
           defaultValue="manual" 
-          className="w-full flex-1 flex flex-col"
+          className="w-full flex-1 flex flex-col overflow-hidden"
           value={selectedTab}
           onValueChange={setSelectedTab}
         >
@@ -191,23 +191,25 @@ export const QuestionAddModal: React.FC<QuestionAddModalProps> = ({
             <TabsTrigger value="ai">AI Generate</TabsTrigger>
           </TabsList>
           
-          <ScrollArea className="flex-1 overflow-auto h-[calc(90vh-8rem)]">
-            <div className="px-6 py-4">
-              <TabsContent value="manual" className="mt-0 data-[state=active]:flex data-[state=active]:flex-col h-full">
-                <ManualQuestionForm onSubmit={handleQuestionAdded} subject={subject} />
-              </TabsContent>
-              
-              <TabsContent value="bank" className="mt-0">
-                <QuestionBankSelector onSelect={handleQuestionAdded} subject={subject} />
-              </TabsContent>
-              
-              <TabsContent value="ai" className="mt-0">
-                <AIQuestionGenerator onGenerate={handleQuestionAdded} subject={subject} />
-              </TabsContent>
-              
-              {previewQuestion && renderQuestionPreview()}
-            </div>
-          </ScrollArea>
+          <div className="flex-1 overflow-auto">
+            <ScrollArea className="h-[calc(90vh-10rem)]">
+              <div className="px-6 py-4">
+                <TabsContent value="manual" className="mt-0 data-[state=active]:flex data-[state=active]:flex-col">
+                  <ManualQuestionForm onSubmit={handleQuestionAdded} subject={subject} />
+                </TabsContent>
+                
+                <TabsContent value="bank" className="mt-0">
+                  <QuestionBankSelector onSelect={handleQuestionAdded} subject={subject} />
+                </TabsContent>
+                
+                <TabsContent value="ai" className="mt-0">
+                  <AIQuestionGenerator onGenerate={handleQuestionAdded} subject={subject} />
+                </TabsContent>
+                
+                {previewQuestion && renderQuestionPreview()}
+              </div>
+            </ScrollArea>
+          </div>
         </Tabs>
       </DialogContent>
     </Dialog>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -571,7 +570,6 @@ export const ManualQuestionForm: React.FC<ManualQuestionFormProps> = ({ onSubmit
         </div>
       </div>
 
-      {/* Type-specific form fields */}
       {renderQuestionTypeSpecificFields()}
 
       <Button type="submit" className="w-full">Add Question</Button>
