@@ -191,7 +191,7 @@ export const QuestionAddModal: React.FC<QuestionAddModalProps> = ({
             <TabsTrigger value="ai">AI Generate</TabsTrigger>
           </TabsList>
           
-          <div className="flex-1 overflow-auto">
+          <div className="flex-1 overflow-hidden">
             <ScrollArea className="h-[calc(90vh-10rem)]">
               <div className="px-6 py-4">
                 <TabsContent value="manual" className="mt-0 data-[state=active]:flex data-[state=active]:flex-col">
