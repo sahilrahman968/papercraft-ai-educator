@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,7 +14,8 @@ import {
   DIFFICULTY_LEVELS, 
   BLOOM_LEVELS,
   MatchPair,
-  SubQuestion
+  SubQuestion,
+  QuestionTypeEnum
 } from '@/types';
 import { Plus, Trash2, FileQuestion } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -49,8 +49,10 @@ export const ManualQuestionForm: React.FC<ManualQuestionFormProps> = ({ onSubmit
   // For Comprehension sub-questions
   const [newSubQuestion, setNewSubQuestion] = useState<Partial<SubQuestion>>({
     text: '',
+    questionTitle: '',
     marks: 1,
     type: 'Short Answer' as QuestionType,
+    difficulty: 'Medium' as Difficulty,
     options: []
   });
   const [newSubQuestionOption, setNewSubQuestionOption] = useState('');
@@ -112,25 +114,27 @@ export const ManualQuestionForm: React.FC<ManualQuestionFormProps> = ({ onSubmit
     if (newSubQuestionOption.trim() === '') return;
     setNewSubQuestion({
       ...newSubQuestion,
-      options: [...(newSubQuestion.options || []), newSubQuestionOption.trim()]
+      options: [...(newSubQuestion.options || []) as string[], newSubQuestionOption.trim()]
     });
     setNewSubQuestionOption('');
   };
 
   const removeSubQuestionOption = (index: number) => {
-    const updatedOptions = [...(newSubQuestion.options || [])];
+    const updatedOptions = [...(newSubQuestion.options || []) as string[]];
     updatedOptions.splice(index, 1);
     setNewSubQuestion({...newSubQuestion, options: updatedOptions});
   };
 
   const addSubQuestion = () => {
-    if (!newSubQuestion.text) return;
+    if (!newSubQuestion.text && !newSubQuestion.questionTitle) return;
     const subQ: SubQuestion = {
       id: `sq-${Date.now()}`,
-      text: newSubQuestion.text,
+      text: newSubQuestion.text || '',
+      questionTitle: newSubQuestion.questionTitle || newSubQuestion.text || '',
       marks: newSubQuestion.marks || 1,
       type: newSubQuestion.type || 'Short Answer',
-      options: newSubQuestion.options,
+      difficulty: newSubQuestion.difficulty || 'Medium',
+      options: newSubQuestion.options as string[],
       answer: newSubQuestion.answer
     };
     setQuestionData({
@@ -139,8 +143,10 @@ export const ManualQuestionForm: React.FC<ManualQuestionFormProps> = ({ onSubmit
     });
     setNewSubQuestion({
       text: '',
+      questionTitle: '',
       marks: 1,
       type: 'Short Answer',
+      difficulty: 'Medium',
       options: []
     });
   };
@@ -279,14 +285,14 @@ export const ManualQuestionForm: React.FC<ManualQuestionFormProps> = ({ onSubmit
                     </Button>
                   </CardHeader>
                   <CardContent className="py-2 px-4">
-                    <p className="mb-1">{subQ.text}</p>
+                    <p className="mb-1">{subQ.text || subQ.questionTitle}</p>
                     <p className="text-sm text-gray-500">Type: {subQ.type}</p>
                     
-                    {subQ.options && subQ.options.length > 0 && (
+                    {subQ.options && (subQ.options as string[]).length > 0 && (
                       <div className="mt-2">
                         <p className="text-sm font-medium">Options:</p>
                         <ul className="list-disc list-inside text-sm">
-                          {subQ.options.map((opt, i) => (
+                          {(subQ.options as string[]).map((opt, i) => (
                             <li key={i}>{opt}</li>
                           ))}
                         </ul>
@@ -310,7 +316,7 @@ export const ManualQuestionForm: React.FC<ManualQuestionFormProps> = ({ onSubmit
                     <Textarea
                       id="sub-q-text"
                       value={newSubQuestion.text || ''}
-                      onChange={(e) => setNewSubQuestion({...newSubQuestion, text: e.target.value})}
+                      onChange={(e) => setNewSubQuestion({...newSubQuestion, text: e.target.value, questionTitle: e.target.value})}
                       placeholder="Enter sub question text"
                     />
                   </div>
@@ -344,12 +350,29 @@ export const ManualQuestionForm: React.FC<ManualQuestionFormProps> = ({ onSubmit
                       />
                     </div>
                   </div>
+
+                  <div>
+                    <Label htmlFor="sub-q-difficulty">Difficulty</Label>
+                    <Select
+                      value={newSubQuestion.difficulty || 'Medium'}
+                      onValueChange={(value: Difficulty) => setNewSubQuestion({...newSubQuestion, difficulty: value})}
+                    >
+                      <SelectTrigger id="sub-q-difficulty">
+                        <SelectValue placeholder="Select difficulty" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {DIFFICULTY_LEVELS.map(level => (
+                          <SelectItem key={level} value={level}>{level}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   
                   {newSubQuestion.type === 'MCQ' && (
                     <div className="space-y-2">
                       <Label>Options</Label>
                       <div className="space-y-2">
-                        {(newSubQuestion.options || []).map((option, index) => (
+                        {(newSubQuestion.options as string[] || []).map((option, index) => (
                           <div key={index} className="flex items-center space-x-2">
                             <Input value={option} readOnly className="flex-1" />
                             <Button 

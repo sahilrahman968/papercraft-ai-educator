@@ -1,3 +1,4 @@
+
 export type Board = 'CBSE' | 'ICSE' | 'State';
 export const BOARDS: Board[] = ['CBSE', 'ICSE', 'State'];
 
@@ -42,11 +43,26 @@ export interface MatchPair {
 
 export interface SubQuestion {
   id: string;
-  text: string;
+  text?: string;
+  questionTitle?: string;
   marks: number;
   type: QuestionType;
-  options?: string[];
+  difficulty?: Difficulty;
+  options?: string[] | Array<{
+    id: string;
+    text: string;
+    isCorrect: boolean;
+  }>;
   answer?: string;
+  evaluationRubric?: Array<{
+    criterion: string;
+    weight: number;
+    keywordHints: string[];
+  }>;
+  syllabusMapping?: {
+    chapter: Array<{ id: string; name: string }>;
+    topic: Array<{ id: string; name: string }>;
+  };
 }
 
 export interface Question {
@@ -128,26 +144,6 @@ export interface GenerateParams {
   };
   totalMarks: number;
   duration: number;
-}
-
-export interface SubQuestion {
-  questionTitle: string;
-  marks: number;
-  difficulty: string;
-  options?: Array<{
-    id: string;
-    text: string;
-    isCorrect: boolean;
-  }>;
-  evaluationRubric?: Array<{
-    criterion: string;
-    weight: number;
-    keywordHints: string[];
-  }>;
-  syllabusMapping?: {
-    chapter: Array<{ id: string; name: string }>;
-    topic: Array<{ id: string; name: string }>;
-  };
 }
 
 export interface QuestionSection {
