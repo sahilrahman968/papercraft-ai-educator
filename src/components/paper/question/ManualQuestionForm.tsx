@@ -39,14 +39,11 @@ export const ManualQuestionForm: React.FC<ManualQuestionFormProps> = ({ onSubmit
     subQuestions: []
   });
 
-  // For MCQ options
   const [newOption, setNewOption] = useState('');
   
-  // For Match the Following pairs
   const [newMatchLeft, setNewMatchLeft] = useState('');
   const [newMatchRight, setNewMatchRight] = useState('');
   
-  // For Comprehension sub-questions
   const [newSubQuestion, setNewSubQuestion] = useState<Partial<SubQuestion>>({
     text: '',
     questionTitle: '',
@@ -57,7 +54,6 @@ export const ManualQuestionForm: React.FC<ManualQuestionFormProps> = ({ onSubmit
   });
   const [newSubQuestionOption, setNewSubQuestionOption] = useState('');
 
-  // For Assertion and Reason
   useEffect(() => {
     if (questionData.type !== 'Assertion and Reason') {
       setQuestionData(prev => ({...prev, assertionText: '', reasonText: ''}));
@@ -332,7 +328,7 @@ export const ManualQuestionForm: React.FC<ManualQuestionFormProps> = ({ onSubmit
                           <SelectValue placeholder="Select type" />
                         </SelectTrigger>
                         <SelectContent>
-                          {QUESTION_TYPES.filter(type => type !== 'Comprehension').map(type => (
+                          {QUESTION_TYPES.filter(type => type !== QuestionTypeEnum.COMPREHENSION).map(type => (
                             <SelectItem key={type} value={type}>{type}</SelectItem>
                           ))}
                         </SelectContent>
@@ -368,7 +364,7 @@ export const ManualQuestionForm: React.FC<ManualQuestionFormProps> = ({ onSubmit
                     </Select>
                   </div>
                   
-                  {newSubQuestion.type === 'MCQ' && (
+                  {newSubQuestion.type === QuestionTypeEnum.MCQ && (
                     <div className="space-y-2">
                       <Label>Options</Label>
                       <div className="space-y-2">
