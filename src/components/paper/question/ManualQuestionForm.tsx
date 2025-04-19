@@ -55,7 +55,7 @@ export const ManualQuestionForm: React.FC<ManualQuestionFormProps> = ({ onSubmit
   const [newSubQuestionOption, setNewSubQuestionOption] = useState('');
 
   useEffect(() => {
-    if (questionData.type !== 'Assertion and Reason') {
+    if (questionData.type !== QuestionTypeEnum.ASSERTION_AND_REASON) {
       setQuestionData(prev => ({...prev, assertionText: '', reasonText: ''}));
     }
   }, [questionData.type]);
@@ -155,7 +155,7 @@ export const ManualQuestionForm: React.FC<ManualQuestionFormProps> = ({ onSubmit
 
   const renderQuestionTypeSpecificFields = () => {
     switch(questionData.type) {
-      case 'MCQ':
+      case QuestionTypeEnum.MCQ:
         return (
           <div className="space-y-4">
             <div className="space-y-2">
@@ -203,7 +203,7 @@ export const ManualQuestionForm: React.FC<ManualQuestionFormProps> = ({ onSubmit
           </div>
         );
       
-      case 'Match the Following':
+      case QuestionTypeEnum.MATCH_THE_FOLLOWING:
         return (
           <div className="space-y-4">
             <div className="space-y-2">
@@ -249,7 +249,7 @@ export const ManualQuestionForm: React.FC<ManualQuestionFormProps> = ({ onSubmit
           </div>
         );
       
-      case 'Comprehension':
+      case QuestionTypeEnum.COMPREHENSION:
         return (
           <div className="space-y-4">
             <div className="space-y-2">
@@ -424,7 +424,7 @@ export const ManualQuestionForm: React.FC<ManualQuestionFormProps> = ({ onSubmit
           </div>
         );
       
-      case 'Assertion and Reason':
+      case QuestionTypeEnum.ASSERTION_AND_REASON:
         return (
           <div className="space-y-4">
             <div className="space-y-2">
