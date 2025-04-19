@@ -8,132 +8,141 @@ import { Question, QuestionType, Difficulty, QUESTION_TYPES, DIFFICULTY_LEVELS }
 import { useData } from '@/context/DataContext';
 import { Search, ChevronDown, ChevronUp } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Badge } from '@/components/ui/badge';
 
 interface QuestionBankSelectorProps {
   onSelect: (question: Question) => void;
   subject: string;
 }
 
+interface SubQuestion {
+  questionTitle: string;
+  marks: number;
+  difficulty: string;
+  options?: Array<{
+    id: string;
+    text: string;
+    isCorrect: boolean;
+  }>;
+  evaluationRubric?: Array<{
+    criterion: string;
+    weight: number;
+    keywordHints: string[];
+  }>;
+}
+
+interface QuestionSection {
+  questionTitle: string;
+  marks: number;
+  difficulty: string;
+  syllabusMapping: {
+    chapter: Array<{ id: string; name: string }>;
+    topic: Array<{ id: string; name: string }>;
+  };
+  questionType: 'option_based' | 'subjective';
+  subQuestions: SubQuestion[];
+}
+
 export const QuestionBankSelector: React.FC<QuestionBankSelectorProps> = ({ onSelect, subject }) => {
-  const { questions } = useData();
   const [filters, setFilters] = useState({
     searchTerm: '',
-    type: 'all-types' as QuestionType | 'all-types',
-    difficulty: 'all-difficulties' as Difficulty | 'all-difficulties',
+    type: 'all-types' as 'option_based' | 'subjective' | 'all-types',
+    difficulty: 'all-difficulties' as string,
     chapter: '',
     topic: ''
   });
   const [expandedQuestion, setExpandedQuestion] = useState<string | null>(null);
 
-  const filteredQuestions = questions.filter(q => {
-    return (
-      q.subject === subject &&
-      (!filters.searchTerm || q.text.toLowerCase().includes(filters.searchTerm.toLowerCase())) &&
-      (filters.type === 'all-types' || q.type === filters.type) &&
-      (filters.difficulty === 'all-difficulties' || q.difficulty === filters.difficulty) &&
-      (!filters.chapter || q.chapter.toLowerCase().includes(filters.chapter.toLowerCase())) &&
-      (!filters.topic || q.topic.toLowerCase().includes(filters.topic.toLowerCase()))
-    );
-  });
-
-  const toggleQuestionExpand = (questionId: string) => {
-    setExpandedQuestion(expandedQuestion === questionId ? null : questionId);
-  };
-
-  const renderQuestionContent = (question: Question) => {
-    switch(question.type) {
-      case 'MCQ':
-        return (
-          <div className="mt-2 space-y-1">
-            <p className="text-sm font-medium">Options:</p>
-            <ul className="list-disc list-inside text-sm pl-2">
-              {question.options?.map((option, i) => (
-                <li key={i} className={question.answer === option ? "font-medium text-green-600" : ""}>
-                  {option} {question.answer === option && "(Correct)"}
-                </li>
-              ))}
-            </ul>
-          </div>
-        );
-        
-      case 'Match the Following':
-        return (
-          <div className="mt-2 space-y-1">
-            <p className="text-sm font-medium">Match Pairs:</p>
-            <div className="grid grid-cols-2 gap-2 mt-1">
-              <div className="space-y-1">
-                <p className="text-xs font-medium text-gray-500">Column A</p>
-                {question.matchPairs?.map((pair, i) => (
-                  <div key={i} className="border p-1 rounded text-sm">{pair.left}</div>
-                ))}
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs font-medium text-gray-500">Column B</p>
-                {question.matchPairs?.map((pair, i) => (
-                  <div key={i} className="border p-1 rounded text-sm">{pair.right}</div>
-                ))}
-              </div>
-            </div>
-          </div>
-        );
-        
-      case 'Comprehension':
-        return (
-          <div className="mt-2 space-y-2">
-            <div className="bg-gray-50 p-2 rounded text-sm">
-              <p className="font-medium mb-1">Passage:</p>
-              <p>{question.text}</p>
-            </div>
-            <p className="text-sm font-medium">Sub Questions:</p>
-            <div className="space-y-2 pl-4">
-              {question.subQuestions?.map((subQ, i) => (
-                <div key={subQ.id} className="border-l-2 pl-2">
-                  <p className="text-sm font-medium">Q{i+1}. {subQ.text} ({subQ.marks} marks)</p>
-                  {subQ.options && subQ.options.length > 0 && (
-                    <div className="mt-1">
-                      <p className="text-xs font-medium">Options:</p>
-                      <ul className="list-disc list-inside text-xs pl-2">
-                        {subQ.options.map((opt, j) => (
-                          <li key={j} className={subQ.answer === opt ? "font-medium text-green-600" : ""}>
-                            {opt}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {subQ.answer && <p className="text-xs mt-1"><span className="font-medium">Answer:</span> {subQ.answer}</p>}
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-        
-      case 'Assertion and Reason':
-        return (
-          <div className="mt-2 space-y-2">
-            <div>
-              <p className="text-sm font-medium">Assertion:</p>
-              <p className="text-sm pl-2">{question.assertionText}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium">Reason:</p>
-              <p className="text-sm pl-2">{question.reasonText}</p>
-            </div>
-            {question.answer && (
-              <p className="text-sm"><span className="font-medium">Answer:</span> {question.answer}</p>
-            )}
-          </div>
-        );
-        
-      default:
-        return question.answer ? (
-          <div className="mt-2">
-            <p className="text-sm font-medium">Answer:</p>
-            <p className="text-sm pl-2">{question.answer}</p>
-          </div>
-        ) : null;
+  const renderQuestionContent = (subQuestion: SubQuestion) => {
+    if (subQuestion.options) {
+      return (
+        <div className="mt-2 space-y-1">
+          <p className="text-sm font-medium">Options:</p>
+          <ul className="list-disc list-inside text-sm pl-2">
+            {subQuestion.options.map((option) => (
+              <li key={option.id} className={option.isCorrect ? "font-medium text-green-600" : ""}>
+                {option.text} {option.isCorrect && "(Correct)"}
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
     }
+
+    if (subQuestion.evaluationRubric) {
+      return (
+        <div className="mt-2 space-y-2">
+          <p className="text-sm font-medium">Evaluation Rubric:</p>
+          {subQuestion.evaluationRubric.map((rubric, index) => (
+            <div key={index} className="pl-2 text-sm">
+              <p className="font-medium">{rubric.criterion} ({rubric.weight}%)</p>
+              <p className="text-gray-600">Key points: {rubric.keywordHints.join(', ')}</p>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    return null;
   };
+
+  const renderQuestion = (question: QuestionSection, index: number) => (
+    <Collapsible
+      key={index}
+      open={expandedQuestion === `${index}`}
+      onOpenChange={() => setExpandedQuestion(expandedQuestion === `${index}` ? null : `${index}`)}
+      className="border rounded-md overflow-hidden mb-4"
+    >
+      <CollapsibleTrigger className="w-full">
+        <div className="p-4 hover:bg-gray-50">
+          <div className="flex justify-between items-start">
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <Badge>{question.questionType}</Badge>
+                <Badge variant="outline">{question.marks} marks</Badge>
+                <Badge variant="secondary">{question.difficulty}</Badge>
+              </div>
+              <p className="mt-2 text-sm">{question.questionTitle || 'Section ' + (index + 1)}</p>
+              <div className="flex flex-wrap gap-1 mt-2">
+                {question.syllabusMapping.chapter.map((ch, i) => (
+                  <Badge key={i} variant="outline" className="text-xs">
+                    {ch.name}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+            <Button variant="ghost" size="sm" className="ml-2">
+              {expandedQuestion === `${index}` ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </Button>
+          </div>
+        </div>
+      </CollapsibleTrigger>
+
+      <CollapsibleContent>
+        <div className="p-4 border-t">
+          <div className="space-y-4">
+            {question.subQuestions.map((subQ, subIndex) => (
+              <div key={subIndex} className="border-l-2 pl-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="font-medium">Q{subIndex + 1}.</span>
+                  <Badge variant="outline">{subQ.marks} marks</Badge>
+                  <Badge variant="secondary">{subQ.difficulty}</Badge>
+                </div>
+                <p className="text-sm mb-2">{subQ.questionTitle}</p>
+                {renderQuestionContent(subQ)}
+              </div>
+            ))}
+          </div>
+          <Button 
+            onClick={() => onSelect(question as any)} 
+            className="mt-4 w-full"
+          >
+            Select This Question
+          </Button>
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
+  );
 
   return (
     <div className="space-y-4">
@@ -152,111 +161,28 @@ export const QuestionBankSelector: React.FC<QuestionBankSelectorProps> = ({ onSe
           <Label>Question Type</Label>
           <Select
             value={filters.type}
-            onValueChange={(value: QuestionType | 'all-types') => setFilters(f => ({ ...f, type: value }))}
+            onValueChange={(value: 'option_based' | 'subjective' | 'all-types') => 
+              setFilters(f => ({ ...f, type: value }))
+            }
           >
             <SelectTrigger>
               <SelectValue placeholder="All types" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all-types">All types</SelectItem>
-              {QUESTION_TYPES.map(type => (
-                <SelectItem key={type} value={type}>{type}</SelectItem>
-              ))}
+              <SelectItem value="option_based">Option Based</SelectItem>
+              <SelectItem value="subjective">Subjective</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-        <div className="space-y-2">
-          <Label>Difficulty</Label>
-          <Select
-            value={filters.difficulty}
-            onValueChange={(value: Difficulty | 'all-difficulties') => setFilters(f => ({ ...f, difficulty: value }))}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="All difficulties" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all-difficulties">All difficulties</SelectItem>
-              {DIFFICULTY_LEVELS.map(level => (
-                <SelectItem key={level} value={level}>{level}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      <div className="space-y-4">
+        {/* This is where we would map through the actual questions array */}
+        {/* For now, rendering a placeholder */}
+        <div className="text-center text-gray-500 py-4">
+          Select filters to view questions
         </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="chapter">Chapter</Label>
-          <Input
-            id="chapter"
-            placeholder="Filter by chapter"
-            value={filters.chapter}
-            onChange={(e) => setFilters(f => ({ ...f, chapter: e.target.value }))}
-          />
-        </div>
-      </div>
-
-      <div className="max-h-[400px] overflow-y-auto space-y-2">
-        {filteredQuestions.length === 0 ? (
-          <p className="text-center text-muted-foreground py-4">No questions found matching your criteria</p>
-        ) : (
-          filteredQuestions.map(question => (
-            <Collapsible
-              key={question.id}
-              open={expandedQuestion === question.id}
-              onOpenChange={() => toggleQuestionExpand(question.id)}
-              className="border rounded-lg overflow-hidden"
-            >
-              <div 
-                className="p-4 hover:bg-accent cursor-pointer"
-                onClick={() => toggleQuestionExpand(question.id)}
-              >
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <div className="flex justify-between">
-                      <span className="font-medium">
-                        {question.type === 'Comprehension' ? 'Comprehension Passage' : question.text}
-                      </span>
-                      <span className="text-sm bg-secondary px-2 py-1 rounded ml-2 whitespace-nowrap">
-                        {question.marks} marks
-                      </span>
-                    </div>
-                    <div className="flex gap-2 text-sm text-muted-foreground mt-1">
-                      <span>{question.type}</span>
-                      <span>•</span>
-                      <span>{question.difficulty}</span>
-                      <span>•</span>
-                      <span>{question.chapter}</span>
-                    </div>
-                  </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="ml-2"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleQuestionExpand(question.id);
-                    }}
-                  >
-                    {expandedQuestion === question.id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                  </Button>
-                </div>
-              </div>
-              <CollapsibleContent>
-                <div className="px-4 pb-4 pt-0 border-t">
-                  {renderQuestionContent(question)}
-                  <Button 
-                    onClick={() => onSelect(question)} 
-                    className="mt-4 w-full"
-                  >
-                    Select This Question
-                  </Button>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-          ))
-        )}
       </div>
     </div>
   );
